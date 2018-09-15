@@ -18,7 +18,7 @@ This kind of activity often goes together with refactoring and fixing old proble
 ---
 ### Let's make things right (again)!
 
-<img src="assets/img/lets-make-right.jpg" alt="Make right" width="600px"/>
+<img src="https://github.com/Stranger6667/talks/blob/master/articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/lets-make-right.jpg?raw=true" alt="Make right" width="600px"/>
 
 Note:
 If we are starting with a fresh new project, then why not do things right (again?) at the beginning?
@@ -118,7 +118,7 @@ It could be even a database connection on the module level. When you import this
 ---
 ## Context matters
 
-<img src="assets/img/context-matters.png" alt="Context" width="400px"/>
+<img src="https://github.com/Stranger6667/talks/blob/master/articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/context-matters.png?raw=true" alt="Context" width="400px"/>
 
 Note:
 Global variables are not bad but often used in a wrong context. Context matters.
@@ -264,7 +264,7 @@ For example, the runtime environment is global. Your os, sys are both in this ca
 ---
 ## Use the right tool for the right job
 
-<img src="assets/img/right-tools.jpg" width="600px"/>
+<img src="https://github.com/Stranger6667/talks/blob/master/articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/right-tools.jpg?raw=true" width="600px"/>
 
 Note:
 And it is OK to have them, because, again, the context matters. Use the right tool for the right job. 
@@ -351,7 +351,7 @@ Also, the test suite becomes more fragile, since some tests could depend on the 
 ---
 ### It could fix some symptoms, but it doesn't fix the problem
 
-<img src="assets/img/fix-problem.jpg" alt="Fix problem" width="600px"/>
+<img src="https://github.com/Stranger6667/talks/blob/master/articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/fix-problem.jpg?raw=true" alt="Fix problem" width="600px"/>
 
 Note:
 In large projects, it could lead to monkey patching a significant amount of different modules.
@@ -855,7 +855,7 @@ pytest-factoryboy provides a lot of different features that are worth checking o
 <h3>Why you should try TDD</h3>
 @snapend
 
-<img src="assets/img/tdd.jpg" alt="TDD" width="400px"/>
+<img src="https://github.com/Stranger6667/talks/blob/master/articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/tdd.jpg?raw=true" alt="TDD" width="400px"/>
 
 ##### Quick recap
 
@@ -886,7 +886,7 @@ Note:
 For example, you’re building a new API with Flask, and you want to add a user’s listing in the beginning.
 
 ---
-<img src="assets/img/this-is-fine.jpg" alt="Fine" width="600px"/>
+<img src="https://github.com/Stranger6667/talks/blob/master/articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/this-is-fine.jpg?raw=true" alt="Fine" width="600px"/>
 
 Note:
 This test will fail, but you’ll know why — there is no such route in your app.

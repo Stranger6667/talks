@@ -80,11 +80,11 @@ Pytest can run your unittest tests as well
 @size[20px](```-k``` for selecting/deselecting a subset of tests)
 
 ```
-$ pytest -k test_s pytest_example.py
-$ pytest -k not test_s pytest_example.py
+$ pytest -k success pytest_example.py
+$ pytest -k not success pytest_example.py
 ```
 
-@size[20px](It will select/deselect all tests that contains ```test_s``` in the name)
+@size[20px](It will select/deselect all tests that contains ```success``` in the name)
 
 ---
 ### Command line usage

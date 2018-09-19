@@ -3,111 +3,105 @@
 #### A Python testing framework
 
 ---
-### What pytest is
-15 sec 
+### Pytest overview
+
+- @color[black](Running tests)
+- @color[black](Fixtures)
+- @color[black](Parametrization)
+- @color[black](Marks)
+- @color[black](Plugins)
 
 ---
-@transition[none]
-@snap[north]
-<h3>Unittest</h3>
-@snapend
-1 min
+### Unittest
 
-code example
 ```python
 import unittest
 
-
 def something():
-    return [42]
-
+    return 42
 
 class TestSomething(unittest.TestCase):
 
-    def test_feature(self):
-        self.assertEqual(something(), [42])
+    def test_success(self):
+        self.assertEqual(something(), 42)
 
     def test_failure(self):
-        self.assertEqual(something(), [7])
-
+        self.assertEqual(something(), 7)
 
 if __name__ == '__main__':
     unittest.main()
 ```
 
+---
+### Pytest
 ```python
 
 def something():
-    return [42]
+    return 42
 
 
-def test_feature():
+def test_success():
     assert something() == 42
+
+
+def test_failure():
+    assert something() == 7
 ```
 
+---
+### Command line usage
 
 ```bash
-$ pytest -v test_something.py
-======================================================================================================================== test session starts ========================================================================================================================
-platform darwin -- Python 3.6.5, pytest-3.6.1, py-1.5.3, pluggy-0.6.0 -- /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6
-cachedir: ../../.pytest_cache
-rootdir: /Users/dmitrydygalo, inifile:
-plugins: celery-4.1.0
-collected 2 items                                                                                                                                                                                                                                                   
+$ pytest pytest_example.py
+====================================== test session starts ======================================
+platform darwin -- Python 3.6.5, pytest-3.8.0, py-1.6.0, pluggy-0.7.1
+rootdir: /Users/dmitrydygalo/PycharmProjects/talks/articles/pytest-cheat-sheet/examples, inifile:
+collected 2 items                                                                              
 
-../../Library/Preferences/PyCharm2018.2/scratches/scratch_17.py::test_feature PASSED                                                                                                                                                                          [ 50%]
-../../Library/Preferences/PyCharm2018.2/scratches/scratch_17.py::test_failure FAILED                                                                                                                                                                          [100%]
+pytest_example.py .F                                                                      [100%]
 
-============================================================================================================================= FAILURES ==============================================================================================================================
-___________________________________________________________________________________________________________________________ test_failure ____________________________________________________________________________________________________________________________
+=========================================== FAILURES ============================================
+_________________________________________ test_failure __________________________________________
 
     def test_failure():
->       assert something() == [7]
-E       assert [42] == [7]
-E         At index 0 diff: 42 != 7
-E         Full diff:
-E         - [42]
-E         + [7]
+>       assert something() == 7
+E       assert 42 == 7
+E        +  where 42 = something()
 
-../../Library/Preferences/PyCharm2018.2/scratches/scratch_17.py:12: AssertionError
-================================================================================================================ 1 failed, 1 passed in 0.06 seconds =================================================================================================================
-
+pytest_example.py:12: AssertionError
+============================== 1 failed, 1 passed in 0.04 seconds ===============================
 ```
 
+Pytest can run your unittest tests as well
 
-CMD example
-CMD output with failures to demonstrate reporting
+---
+### Command line usage
 
+@size[20px](```-k``` for selecting/deselecting a subset of tests)
 
-
-# Test discovery
-30 sec
-
--k for select something and exclude another
---ignore for some incompatible code
-
-```bash
- pytest -k test_feature -v /Users/dmitrydygalo/Library/Preferences/PyCharm2018.2/scratches/scratch_17.py
-======================================================================================================================== test session starts ========================================================================================================================
-platform darwin -- Python 3.6.5, pytest-3.6.1, py-1.5.3, pluggy-0.6.0 -- /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6
-cachedir: ../../.pytest_cache
-rootdir: /Users/dmitrydygalo, inifile:
-plugins: celery-4.1.0
-collected 2 items / 1 deselected                                                                                                                                                                                                                                    
-
-../../Library/Preferences/PyCharm2018.2/scratches/scratch_17.py::test_feature PASSED                                                                                                                                                                          [100%]
-
-============================================================================================================== 1 passed, 1 deselected in 0.01 seconds ===============================================================================================================
+```
+$ pytest -k test_s pytest_example.py
+$ pytest -k not test_s pytest_example.py
 ```
 
-```bash
-pytest --ignore tests/python2_tests tests
+@size[20px](It will select/deselect all tests that contains ```test_s``` in the name)
+
+---
+### Command line usage
+
+@size[20px](```--ignore``` for ignoring some directories / files completely)
+
+```
+$ pytest --ignore=python25_tests.py pytest_example.py
 ```
 
-# Fixtures
-1 min
+@size[20px](It will completely ignore ```python25_tests.py``` file)
 
-Simple example + usage in tests
+---
+### Fixtures
+
+Flask example
+
 ```python
 from app import create_flask_app
 import pytest
@@ -115,29 +109,38 @@ import pytest
 
 @pytest.fixture
 def app():
-    instance = create_flask_app()
+    instance = create_flask_app("settings.TestSettings")
     with instance.app_context():
         yield instance 
 
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    with app.test_client() as client:
+        yield client
+```
 
+---
+### Fixtures
 
+Usage in tests
+
+```python
 def test_something(client):
     assert client.get('/').data == 'Your index content'
 ```
 
+---
+### Fixtures
 
-Session-scope fixtures. Teardown logic for fixtures. Mock for example?
+You could define start-up and tear-down logic using `yield`
 
 ```python
 import pytest
 from app import models
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def db_setup(app):
     models.db.create_all(app=app)
 
@@ -146,46 +149,150 @@ def db_setup(app):
     models.db.drop_all(app=app)
 ```
 
-CMD + output with --fixtures listing
+---
+### Fixtures
+
+You can list all available fixtures with `--fixtures`
 ```bash
-$ pytest --fixtures
-======================================================================================================================== test session starts ========================================================================================================================
-platform darwin -- Python 3.6.5, pytest-3.6.1, py-1.5.3, pluggy-0.6.0
-rootdir: /Users/dmitrydygalo/PycharmProjects/talks, inifile:
-plugins: celery-4.1.0
-collected 0 items                                                                                                                                                                                                                                                   
-<fixtures list>
+$  pytest --fixtures 
+====================================== test session starts =======================================
+platform darwin -- Python 3.6.5, pytest-3.8.0, py-1.6.0, pluggy-0.7.1
+rootdir: /Users/dmitrydygalo/PycharmProjects/talks/articles/pytest-cheat-sheet/examples, inifile:
+collected 0 items                                                                                
+cache
+    Return a cache object that can persist state between testing sessions.
+    
+    cache.get(key, default)
+    cache.set(key, value)
+... 
 ```
 
-# Parametrization
-30 sec
+---
+### Parametrization
 
-In fixtures. code example
+Tests that use `app` will be executed for each app parameter
+
 ```python
+from app import create_flask_app
+import pytest
 
+
+@pytest.fixture(params=["settings.Setup1", "settings.Setup2"])
+def app(request):
+    instance = create_flask_app(request.param)
+    with instance.app_context():
+        yield instance
 ```
-On functions. Code example + output
 
-# Marks
-30 sec
+---
+### Parametrization
 
-Skipif. Different platforms / Pythons + output
-Xfail. Output
-
-# Plugin
-1 minute
-- pytest-django. client + assert queries number
-- pytest-factoryboy. Model + factory + test.
-- pytest-flask. `options` mark 
-- pytest-selenium. selenium.get() example + CMD option with driver.
+```python
+import pytest
 
 
+def twice(value):
+    return value * 2
 
-plan:
-1. What py.test is. General idea. 15 sec 
-2. Small example of test vs unittest. plain asserts + example of output. unit tests could be run by py.test. 1 min 
-3. Test discovery. -k / --ignore. example for python 2 / 3 incompat. 30 sec
-4. Fixtures. Simple definition. Different scopes. Teardown logic with yield. 1 min  
-5. Parametrization. 30 sec
-6. Marks. Skipif / xfail. 30 sec
-7. Plugins. 30 sec
+
+@pytest.mark.parametrize('value, expected', (
+    (1, 2),
+    (3, 6),
+    (4, 8),
+))
+def test_twice(value, expected):
+    assert twice(value) == expected
+```
+
+---
+### Marks
+
+Skip slow tests with a custom mark
+```python
+import pytest
+
+@pytest.mark.slow
+def test_cli():
+    ...
+```
+
+---
+### Marks
+
+Skip slow tests with a custom mark
+
+```bash
+pytest -m "not slow"  mark_example.py
+====================================== test session starts =======================================
+platform darwin -- Python 3.6.5, pytest-3.8.0, py-1.6.0, pluggy-0.7.1
+rootdir: /Users/dmitrydygalo/PycharmProjects/talks/articles/pytest-cheat-sheet/examples, inifile:
+collected 1 item / 1 deselected                                                                  
+
+================================== 1 deselected in 0.00 seconds ==================================
+```
+
+---
+### Built-in markers
+
+Skip if some condition is met
+
+```python
+import sys
+import pytest
+
+
+@pytest.mark.skipif(sys.version_info[0] == 2, reason="Python 2 only test")
+def test_something():
+    ...
+```
+
+---
+### Plugins
+
+pytest-factoryboy
+
+```python
+class User(Base):
+    id = Column(Integer(), primary_key=True)
+    name = Column(Text())
+
+
+class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = User
+        sqlalchemy_session = session   # the SQLAlchemy session object
+
+    id = factory.Sequence(lambda n: n)
+    name = "John Doe"
+```
+
+---
+### Plugins
+
+pytest-factoryboy
+
+```python
+from pytest_factoryboy import register
+
+
+@register
+class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
+    ...
+```
+
+---
+### Plugins
+
+pytest-factoryboy
+
+```python
+def test_model_fixture(user):
+    assert user.name == 'John Doe'
+
+
+def test_factory_fixture(user_factory):
+    assert user_factory().name == 'John Doe'
+```
+
+---
+# Thank you

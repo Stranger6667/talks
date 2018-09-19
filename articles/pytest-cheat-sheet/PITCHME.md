@@ -249,7 +249,19 @@ def test_something():
 ---
 ### Plugins
 
-pytest-factoryboy
+There are a lot of useful plugins:
+- pytest-factoryboy
+- pytest-django
+- pytest-flask
+- pytest-splinter
+- pytest-qt
+- pytest-asyncio
+
+---
+# Thank you
+
+---
+### Pytest-factoryboy
 
 ```python
 class User(Base):
@@ -267,9 +279,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
 ```
 
 ---
-### Plugins
-
-pytest-factoryboy
+### Pytest-factoryboy
 
 ```python
 from pytest_factoryboy import register
@@ -281,9 +291,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
 ```
 
 ---
-### Plugins
-
-pytest-factoryboy
+### Pytest-factoryboy
 
 ```python
 def test_model_fixture(user):
@@ -293,6 +301,3 @@ def test_model_fixture(user):
 def test_factory_fixture(user_factory):
     assert user_factory().name == 'John Doe'
 ```
-
----
-# Thank you

@@ -49,12 +49,9 @@ For unittests when you’re testing small, independent units of your code and as
 @snapend
 
 ```python
-from django.conf import settings
-```
+import logging
 
-```python
-# django/conf/__init__.py
-settings = LazySettings()
+logger = logging.getLogger(__name__)
 ```
 
 +++
@@ -62,12 +59,6 @@ settings = LazySettings()
 @snap[north]
 <h3>Global variables</h3>
 @snapend
-
-```python
-import logging
-
-logger = logging.getLogger(__name__)
-```
 
 ```python
 # logging/__init__.py
@@ -92,7 +83,9 @@ exec(code, module.__dict__)
 sys.modules[module.__spec__.name] = module
 ```
 
-More: https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
+More: 
+
+https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
 
 Note:
 Next time Python’s import machinery will look at `sys.modules` first.
@@ -101,9 +94,9 @@ If you want to invalidate cache you need to remove a key from `sys.modules`.
 ---
 ### Testing?
 
+Note:
 If some module is required in two different tests, then it will be executed in a context of the first test and then it will be taken from cache in the second test, unless it is not reloaded.
 It could lead to various issues if the second test module requires different context to be tested.
-TODO. Diagram?
 
 ---
 ### Example

@@ -77,10 +77,15 @@ def getLogger(name=None):
 ### Imports in Python
 
 ```python
-module = create_module_object(name)
+if name in sys.modules:
+    return sys.modules[name]
+spec = load_spec(name)
+module = create_module()
+init_module(spec, module)
+sys.modules[spec.name] = module
 code = get_module_code(name)
 exec(code, module.__dict__)
-sys.modules[module.__spec__.name] = module
+return sys.modules[spec.name]
 ```
 
 More: 
@@ -94,7 +99,6 @@ If you want to invalidate cache you need to remove a key from `sys.modules`.
 ---
 ### Testing?
 
-Note:
 If some module is required in two different tests, then it will be executed in a context of the first test and then it will be taken from cache in the second test, unless it is not reloaded.
 It could lead to various issues if the second test module requires different context to be tested.
 
@@ -102,20 +106,71 @@ It could lead to various issues if the second test module requires different con
 ### Example
 
 ```python
+# settings.py
+import os
 
+DB_URL = os.environ.get("DB_URL", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+
+# database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from . import settings
+
+
+def _create_db(url):
+    engine = create_engine(url)
+    session = sessionmaker(bind=engine)
+    session = scoped_session(session)
+    return engine, session
+
+
+engine, session = _create_db(settings.DB_URL)
+
+
+# handlers.py
+from .database import session
+from .models import Booking
+
+
+def create_booking(data):
+    booking = Booking(**data)
+    session.add(booking)
+    session.commit()
+
+
+def get_booking(id):
+    return session.query(Booking).get(id)
 ```
 
 ---
 ### Test example
 
+```python
+from .handlers import create_booking, get_booking
+
+
+def test_create_booking():
+    email = "test@test.com"
+    booking = create_booking(email=email)
+    assert booking.email == email
+
+
+def test_get_booking():
+    assert get_booking(1) is None
+```
+
+---
+### How session works
+
+- It is lazy
+- It is thread-local
 
 ---
 ### Details
 
-# identity map explanation + code example
+Identity map explanation + code example
 
----
-### Thread-local session
 
 ---
 ### Result
@@ -126,7 +181,37 @@ It could lead to various issues if the second test module requires different con
 ---
 ### Monkey-patching
 
-# real example from the codebase
+```python
+# conftest.py
+import database
+
+
+@pytest.fixture(scope='session', autouse=True)
+def db_schema(db_url):
+    engine = create_engine(db_url)
+
+    # Create extensions, tables, etc
+
+    Session = orm.scoped_session(orm.sessionmaker())
+    Session.configure(bind=engine)
+    session = Session()
+
+    yield session
+
+    Session.remove()
+    # Drop tables, extensions, etc
+
+
+@pytest.fixture(autouse=True)
+def db(db_schema, monkeypatch):
+    db_schema.begin_nested()
+    monkeypatch.setattr(database, 'db', db_schema)
+
+    yield db_schema
+
+    db_schema.rollback()
+    db_schema.close()
+```
 
 ---
 ### It could fix some symptoms, but it doesn't fix the problem

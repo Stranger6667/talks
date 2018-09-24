@@ -235,10 +235,6 @@ We want to initialise it only when we need it; just in the desired context.
 <h3>Deferred initialization and application context</h3>
 @snapend
 
-#### Flask-SQLAlchemy
-
-# Python example
-
 Note:
 Flask has a beautiful way of solving this problem — init_app pattern. 
 It allows you to isolate some global state in an object and control when to initialise it. 
@@ -380,7 +376,7 @@ Note:
 <h3>Dependency injection</h3>
 @snapend
 
-# Flask example + Flask-SQLAlchemy
+### Flask example + Flask-SQLAlchemy
 Note:
 There is another technique that was used in the previous examples but wasn’t mentioned explicitly. Dependency injection.
 
@@ -390,7 +386,7 @@ There is another technique that was used in the previous examples but wasn’t m
 <h3>Dependency injection</h3>
 @snapend
 
-# Redis-py connection pool + tests
+### Redis-py connection pool + tests
 +++
 @transition[none]
 @snap[north]
@@ -409,7 +405,33 @@ For example, you could isolate some hard-to-test logic (e.g., a 3rd party servic
 Flask allows you to write isolated extensions with ease, in pytest you can reuse and parametrize fixtures in tests.
 
 ---
-# Multiple inheritance
+## Multiple inheritance
+
+```python
+
+```
+
+Consider as an alternative
+
+Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
+
+---
+## Database
+
+### New database for each testcase
+### + pytest example
+
+---
+## Database
+
+### Truncate all data for each testcase
+### + pytest example
+
+---
+## Database
+
+### Wrap each testcase into transaction
+### + pytest example
 
 ---
 @transition[none]

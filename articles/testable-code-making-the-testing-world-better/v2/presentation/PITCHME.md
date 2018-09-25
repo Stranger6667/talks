@@ -74,27 +74,55 @@ def getLogger(name=None):
 ```
 
 ---
-### Imports in Python
+### What happens during import
 
 ```python
+# Check cache
 if name in sys.modules:
     return sys.modules[name]
-spec = load_spec(name)
-module = create_module()
-init_module(spec, module)
+# Load parent modules if exist
+if has_parents(name):
+    load_parents()
+    # Check the cache again
+    if name in sys.modules:
+        return sys.modules[name]
+# Find module spec
+spec = find_spec(name)
+# Initialize module
+module = create_module(spec)
+init_module_attrs(spec, module)
+# Cache it
 sys.modules[spec.name] = module
+# Execute module
 code = get_module_code(name)
 exec(code, module.__dict__)
+# Return from cache
 return sys.modules[spec.name]
 ```
 
-More: 
-
-https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
-
 Note:
-Next time Python’s import machinery will look at `sys.modules` first.
-If you want to invalidate cache you need to remove a key from `sys.modules`.
+Python's import machinery will check for already imported module in cache first.
+If the module has parent modules, they will be loaded first, then the cache will be checked again.
+Then will find a module specification - encapsulation of the module's 
+import-related information (absolute name of the module, loader, parent package, etc).
+Then module object will be created and initialized with certain attributes from the spec.
+Then the module is cached, executed and returned. 
+If any errors will occur during the execution, only requested module will be removed from the cache. 
+
++++
+### Key points
+
+- Module is an object
+- Module's code is executed in a certain context
+- Modules are cached
+- The cache could be modified even if `ImportError` occurs
+
++++
+### More information
+
+- Source: https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
+- Docs: https://docs.python.org/3/reference/import.html
+- PEP: https://www.python.org/dev/peps/pep-0451/
 
 ---
 ### Testing?

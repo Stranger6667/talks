@@ -73,11 +73,16 @@ def getLogger(name=None):
         return root
 ```
 
+Note:
+To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
+what happens when you use a module with a global variable in its namespace. 
+To understand this lets' look how the Python import system works.
+
 ---
 ### What happens during import
 
 ```python
-# Check cache
+# Check the cache
 if name in sys.modules:
     return sys.modules[name]
 # Load parent modules if exist
@@ -86,14 +91,14 @@ if has_parents(name):
     # Check the cache again
     if name in sys.modules:
         return sys.modules[name]
-# Find module spec
+# Find a module spec
 spec = find_spec(name)
-# Initialize module
+# Initialize a module
 module = create_module(spec)
 init_module_attrs(spec, module)
-# Cache it
+# Cache the module
 sys.modules[spec.name] = module
-# Execute module
+# Execute the module
 code = get_module_code(name)
 exec(code, module.__dict__)
 # Return from cache
@@ -113,9 +118,9 @@ If any errors will occur during the execution, only requested module will be rem
 ### Key points
 
 - Module is an object
-- Module's code is executed in a certain context
+- Module's code is executed and attributes are evaluated in a certain context
 - Modules are cached
-- The cache could be modified even if `ImportError` occurs
+- The cache could be modified even if an error occurs
 
 +++
 ### More information
@@ -131,7 +136,7 @@ If some module is required in two different tests, then it will be executed in a
 It could lead to various issues if the second test module requires different context to be tested.
 
 ---
-### Example
+### Code example
 
 ```python
 # settings.py
@@ -171,8 +176,14 @@ def get_booking(id):
     return session.query(Booking).get(id)
 ```
 
+Note:
+We have a separate module with settings, that are evaluated during the first import.
+We have globally defined engine and session. The session is used in other parts of the code.
+What do you think, is it a real code?
+Ok, lets look at a couple of tests for the handlers above.
+
 ---
-### Test example
+### Tests example
 
 ```python
 from .handlers import create_booking, get_booking
@@ -188,23 +199,142 @@ def test_get_booking():
     assert get_booking(1) is None
 ```
 
+Note:
+We need these tests to be isolated and independent. Are they independent and isolated?
+To understand what is going on during these tests, lets look at how the SQLAlchemy session works. 
+
 ---
 ### How session works
 
-- It is lazy
-- It is thread-local
+##### It is lazy
+
+```python
+class scoped_session(object):
+    session_factory = None
+
+    def __init__(self, session_factory, scopefunc=None):
+        self.session_factory = session_factory
+
+        if scopefunc:
+            self.registry = ScopedRegistry(session_factory, scopefunc)
+        else:
+            self.registry = ThreadLocalRegistry(session_factory)
+            
+def instrument(name):
+    def do(self, *args, **kwargs):
+        return getattr(self.registry(), name)(*args, **kwargs)
+    return do
+
+
+for meth in Session.public_methods:
+    setattr(scoped_session, meth, instrument(meth))
+```
+
+Note:
+Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
+initializes the factory lazily as well. 
+
++++
+### How session works
+
+##### It is thread-local
+
+```python
+class ThreadLocalRegistry(ScopedRegistry):
+
+    def __init__(self, createfunc):
+        self.createfunc = createfunc
+        self.registry = threading.local()
+
+    def __call__(self):
+        try:
+            return self.registry.value
+        except AttributeError:
+            val = self.registry.value = self.createfunc()
+            return val
+```
+
+Note:
+The registry is thread-local - values will be different for separate threads.
 
 ---
-### Details
+### How session works with a database
 
-Identity map explanation + code example
+#### It uses an identity map
+##### Simplified version
 
+```python
+import weakref
+
+class IdentityMap(object):
+    def __init__(self):
+        self._dict = {}
+        self._modified = set()
+        self._wr = weakref.ref(self)
+    ...
+
+class Session:
+
+    def __init__(self, *args, **kwargs):
+        self.identity_map = IdentityMap()
+        ...
+```
+
+Note:
+An identity map is basically a cache between your application code and the database. 
+If the requested data has already been loaded from the database, the identity map returns the same instance 
+of the already instantiated object, but if it has not been loaded yet, it loads it and stores the new object in the map.
 
 ---
-### Result
+### State before the first test
+
+- Session is defined but not evaluated
+- DB_URL is evaluated
+- `psycopg2` is loaded as a side-effect of `create_engine`
+- modules are cached
+
+Note:
+Even before the first test some thing already evaluated and cached.
+Nothing critical, but these state changes could interfere with your tests. 
+If you want to use another DB URL you'll need to either replace an attribute in the module or reload the module.
+Some modules could be heavy to load. It could unnecessary slow down the testing process. 
+The same goes for any heavy computations on the module level.
+
+---
+### State after the first test
 
 - Identity map is modified
 - Changes are committed to the DB
+
+Note:
+The new booking, created during the first test is saved in the identity map and as well it is committed to the DB.
+This breaks isolation of our test cases.
+Sometimes some of these issues could be acceptable or they could be managed with some framework (like Django test suite)
+But if you want to implement global entities by yourself you should at least be aware of the following aspects.
+
+---
+### Globals check list
+
+#### What to think about when implementing something on the module level.
+
+- Module caching
+- Different contexts
+- Laziness
+- Thread-safety
+- Weak references
+
+Note:
+All your modules are executed and cached. The context of execution could be not exactly what you need.
+Laziness plays well, it postpones evaluation until the very last moment and at least you have more control over it.
+Your global variable could be accessed by different threads - use locks and thread-local storage for that
+If you want to cache something - consider having weak references. 
+Objects will not be kept only because it is cached somewhere.
+ 
+---
+### How to handle all of this?
+
+Note:
+Let's go from ad-hoc solutions to something better. 
 
 ---
 ### Monkey-patching
@@ -240,6 +370,25 @@ def db(db_schema, monkeypatch):
     db_schema.rollback()
     db_schema.close()
 ```
+
+Note:
+Here is an example of how global objects could be handled in tests. Monkey-patching.
+
+---
+### What is wrong?
+
+@ul
+- @color[black](Complexity grows very fast)
+- @color[black](Weaker tests)
+- @color[black](Decreases code coverage)
+- @color[black](Fragile test suite)
+@ulend
+
+Note:
+Whats wrong with that? Complexity grows dramatically fast
+Your tests will be weaker, because they test less real code and more mocked code.
+It decreases the actual code coverage. 
+Also, the test suite becomes more fragile, since some tests could depend on the execution order. 
 
 ---
 ### It could fix some symptoms, but it doesn't fix the problem
@@ -316,6 +465,35 @@ def session(db):
 Note:
 This is how it could be changed with `Flask-SQLAlchemy` extension.
 Now the database is initialised only when the application initialises — we put the DB into application context.
+
++++
+@transition[none]
+@snap[north]
+<h3>How does it work?</h3>
+@snapend
+
+##### Via registration of teardown function
+
+```python
+class SQLAlchemy(object):
+    ...
+
+    def init_app(self, app):
+        ...
+
+        @app.teardown_appcontext
+        def shutdown_session(response_or_exc):
+            if app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN']:
+                if response_or_exc is None:
+                    self.session.commit()
+
+            self.session.remove()
+            return response_or_exc
+```
+
+Note:
+It registers a teardown function for the application. And as a consequence we need to put our tests into the application context.
+It could be acceptable for certain cases, especially in web development.
 
 +++
 @transition[none]
@@ -398,13 +576,13 @@ Note:
 <h3>Dependency injection</h3>
 @snapend
 
-+++
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
+```python
+def create_booking(session, data):
+    booking = Booking(**data)
+    session.add(booking)
+    session.commit()
+```
 
-### Flask example + Flask-SQLAlchemy
 Note:
 There is another technique that was used in the previous examples but wasn’t mentioned explicitly. Dependency injection.
 
@@ -414,7 +592,62 @@ There is another technique that was used in the previous examples but wasn’t m
 <h3>Dependency injection</h3>
 @snapend
 
+### Flask example + Flask-SQLAlchemy
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
 ### Redis-py connection pool + tests
+
+#### Simplified version
+```python
+class StrictRedis(object):
+
+    def __init__(self, connection_pool=None, **kwargs):
+        if not connection_pool:
+            ...
+            connection_pool = ConnectionPool(**kwargs)
+        self.connection_pool = connection_pool
+```
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+### Redis-py connection pool
+
+#### Tests
+```python
+class DummyConnection(object):
+    description_format = "DummyConnection<>"
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.pid = os.getpid()
+
+
+class TestConnectionPool(object):
+    def get_pool(self, connection_kwargs=None, max_connections=None,
+                 connection_class=DummyConnection):
+        connection_kwargs = connection_kwargs or {}
+        return redis.ConnectionPool(
+            connection_class=connection_class,
+            max_connections=max_connections,
+            **connection_kwargs)
+
+    def test_connection_creation(self):
+        connection_kwargs = {'foo': 'bar', 'biz': 'baz'}
+        pool = self.get_pool(connection_kwargs=connection_kwargs)
+        connection = pool.get_connection('_')
+        assert isinstance(connection, DummyConnection)
+        assert connection.kwargs == connection_kwargs
+```
+
 +++
 @transition[none]
 @snap[north]

@@ -469,7 +469,7 @@ Now the database is initialised only when the application initialises — we
 +++
 @transition[none]
 @snap[north]
-<h3>How does it work?</h3>
+<h4>How does it work?</h4>
 @snapend
 
 ##### Via registration of teardown function

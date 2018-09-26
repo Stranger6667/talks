@@ -132,6 +132,7 @@ If any errors will occur during the execution, only requested module will be rem
 ---
 ### Testing?
 
+Note:
 If some module is required in two different tests, then it will be executed in a context of the first test and then it will be taken from cache in the second test, unless it is not reloaded.
 It could lead to various issues if the second test module requires different context to be tested.
 
@@ -142,7 +143,7 @@ It could lead to various issues if the second test module requires different con
 # settings.py
 import os
 
-DB_URL = os.environ.get("DB_URL", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
 
 # database.py
 from sqlalchemy import create_engine
@@ -151,14 +152,14 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from . import settings
 
 
-def _create_db(url):
-    engine = create_engine(url)
+def _create_db(uri):
+    engine = create_engine(uri)
     session = sessionmaker(bind=engine)
     session = scoped_session(session)
     return engine, session
 
 
-engine, session = _create_db(settings.DB_URL)
+engine, session = _create_db(settings.DB_URI)
 
 
 # handlers.py
@@ -261,7 +262,6 @@ The registry is thread-local - values will be different for separate threads.
 ### How session works with a database
 
 #### It uses an identity map
-##### Simplified version
 
 ```python
 import weakref
@@ -289,7 +289,7 @@ of the already instantiated object, but if it has not been loaded yet, it loads 
 ### State before the first test
 
 - Session is defined but not evaluated
-- DB_URL is evaluated
+- DB_URI is evaluated
 - `psycopg2` is loaded as a side-effect of `create_engine`
 - modules are cached
 
@@ -345,8 +345,8 @@ import database
 
 
 @pytest.fixture(scope='session', autouse=True)
-def db_schema(db_url):
-    engine = create_engine(db_url)
+def db_schema(db_uri):
+    engine = create_engine(db_uri)
 
     # Create extensions, tables, etc
 
@@ -409,7 +409,7 @@ We want to initialise it only when we need it; just in the desired context.
 ---
 @transition[none]
 @snap[north]
-<h3>Deferred initialization and application context</h3>
+<h3>Deferred initialization</h3>
 @snapend
 
 Note:
@@ -431,25 +431,18 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-# app.py
-from flask import Flask
-
-application = App(__name__)
-
-from .database import db
-
-db.init_app(application)
-
 # conftest.py
-from .app import application
+from flask import Flask
 import database
 
 
 @pytest.fixture(scope="session")
 def db():
-    # Create extensions, tables, etc
+    app = Flask(__name__)
+    database.db.init_app(app)
+    database.db.create_all()    
     yield database.db
-    # Drop tables, extensions, etc
+    database.db.drop_all()
 
 
 @pytest.fixture(autouse=True)
@@ -457,6 +450,7 @@ def session(db):
     db.session.begin_nested()
     yield db.session
     db.session.rollback()
+    db.session.remove()
 ```
 
 @[1-13](Database & Application)
@@ -602,7 +596,6 @@ There is another technique that was used in the previous examples but wasn’t m
 
 ### Redis-py connection pool + tests
 
-#### Simplified version
 ```python
 class StrictRedis(object):
 

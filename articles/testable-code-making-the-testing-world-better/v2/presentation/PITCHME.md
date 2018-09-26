@@ -43,101 +43,7 @@ These principles apply to different testing levels.
 For unittests when you’re testing small, independent units of your code and as well for integration tests.
 
 ---
-@transition[none]
-@snap[north]
-<h3>Global variables</h3>
-@snapend
-
-```python
-import logging
-
-logger = logging.getLogger(__name__)
-```
-
-+++
-@transition[none]
-@snap[north]
-<h3>Global variables</h3>
-@snapend
-
-```python
-# logging/__init__.py
-root = RootLogger(WARNING)
-Logger.root = root
-Logger.manager = Manager(Logger.root)
-
-def getLogger(name=None):
-    if name:
-        return Logger.manager.getLogger(name)
-    else:
-        return root
-```
-
-Note:
-To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
-what happens when you use a module with a global variable in its namespace. 
-To understand this lets' look how the Python import system works.
-
----
-### What happens during import
-
-```python
-# Check the cache
-if name in sys.modules:
-    return sys.modules[name]
-# Load parent modules if exist
-if has_parents(name):
-    load_parents()
-    # Check the cache again
-    if name in sys.modules:
-        return sys.modules[name]
-# Find a module spec
-spec = find_spec(name)
-# Initialize a module
-module = create_module(spec)
-init_module_attrs(spec, module)
-# Cache the module
-sys.modules[spec.name] = module
-# Execute the module
-code = get_module_code(name)
-exec(code, module.__dict__)
-# Return from cache
-return sys.modules[spec.name]
-```
-
-Note:
-Python's import machinery will check for already imported module in cache first.
-If the module has parent modules, they will be loaded first, then the cache will be checked again.
-Then will find a module specification - encapsulation of the module's 
-import-related information (absolute name of the module, loader, parent package, etc).
-Then module object will be created and initialized with certain attributes from the spec.
-Then the module is cached, executed and returned. 
-If any errors will occur during the execution, only requested module will be removed from the cache. 
-
-+++
-### Key points
-
-- Module is an object
-- Module's code is executed and attributes are evaluated in a certain context
-- Modules are cached
-- The cache could be modified even if an error occurs
-
-+++
-### More information
-
-- Source: https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
-- Docs: https://docs.python.org/3/reference/import.html
-- PEP: https://www.python.org/dev/peps/pep-0451/
-
----
-### Testing?
-
-Note:
-If some module is required in two different tests, then it will be executed in a context of the first test and then it will be taken from cache in the second test, unless it is not reloaded.
-It could lead to various issues if the second test module requires different context to be tested.
-
----
-### Code example
+### Testing code that involves databases
 
 ```python
 # settings.py
@@ -178,6 +84,7 @@ def get_booking(id):
 ```
 
 Note:
+We have a web application that works with database and we need to test it. We need different tests - unit and integration tests as well.
 We have a separate module with settings, that are evaluated during the first import.
 We have globally defined engine and session. The session is used in other parts of the code.
 What do you think, is it a real code?
@@ -202,7 +109,70 @@ def test_get_booking():
 
 Note:
 We need these tests to be isolated and independent. Are they independent and isolated?
-To understand what is going on during these tests, lets look at how the SQLAlchemy session works. 
+To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
+what happens when you use a module with a global variable in its namespace. 
+To understand this lets' look how the Python import system works. 
+
+---
+### What happens during import
+
+```python
+# Check the cache
+if name in sys.modules:
+    return sys.modules[name]
+
+# Load parent modules if exist
+if has_parents(name):
+    load_parents()
+    # Check the cache again
+    if name in sys.modules:
+        return sys.modules[name]
+
+# Find a module spec
+spec = find_spec(name)
+
+# Initialize a module
+module = create_module(spec)
+init_module_attrs(spec, module)
+
+# Cache the module
+sys.modules[spec.name] = module
+
+# Execute the module
+code = get_module_code(name)
+exec(code, module.__dict__)
+# Return from cache
+return sys.modules[spec.name]
+```
+
+Note:
+Python's import machinery will check for already imported module in cache first.
+If the module has parent modules, they will be loaded first, then the cache will be checked again.
+Then will find a module specification - encapsulation of the module's 
+import-related information (absolute name of the module, loader, parent package, etc).
+Then module object will be created and initialized with certain attributes from the spec.
+Then the module is cached, executed and returned. 
+If any errors will occur during the execution, only requested module will be removed from the cache. 
+
++++
+### Key points
+
+- Module is an object
+- Module's code is executed and attributes are evaluated in a certain context
+- Modules are cached
+- The cache could be modified even if an error occurs
+
+Note:
+If some module is required in two different tests, then it will be executed in a context of the first test and then 
+it will be taken from cache in the second test, unless it is not reloaded.
+It could lead to various issues if the second test module requires different context to be tested.
+
++++
+### More information
+
+- Source: https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
+- Docs: https://docs.python.org/3/reference/import.html
+- PEP: https://www.python.org/dev/peps/pep-0451/
 
 ---
 ### How session works
@@ -232,6 +202,7 @@ for meth in Session.public_methods:
 ```
 
 Note:
+To understand what is going on during these tests, lets look at how the SQLAlchemy session works.
 Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
 initializes the factory lazily as well. 
 
@@ -382,6 +353,7 @@ Here is an example of how global objects could be handled in tests. Monkey-patch
 - @color[black](Weaker tests)
 - @color[black](Decreases code coverage)
 - @color[black](Fragile test suite)
+- @color[black](Could affect test suite running time)
 @ulend
 
 Note:
@@ -389,6 +361,9 @@ Whats wrong with that? Complexity grows dramatically fast
 Your tests will be weaker, because they test less real code and more mocked code.
 It decreases the actual code coverage. 
 Also, the test suite becomes more fragile, since some tests could depend on the execution order. 
+If you need to create and destroy many objects for your test it could affect speed of your test suite execution.
+To run tests on every commit you need fast tests. When it is too long you're switching to another context, e.g. to browser.
+After some time your tests will finish, but Facebook on your tab will not.
 
 ---
 ### It could fix some symptoms, but it doesn't fix the problem
@@ -642,6 +617,62 @@ class TestConnectionPool(object):
 ```
 
 +++
+### Multiple inheritance
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from .models import Booking
+
+
+class SessionFactory:
+
+    def __init__(self, db_uri):
+        self.db_uri = db_uri
+
+    def create_engine_and_session(self):
+        engine = create_engine(self.db_uri)
+        session = sessionmaker(bind=engine)
+        session = scoped_session(session)
+        return engine, session
+
+
+class BookingFactory(SessionFactory):
+
+    def create_booking(self, data):
+        session = self.create_engine_and_session()
+        booking = Booking(**data)
+        session.add(booking)
+        session.commit()
+```
+
++++
+### Multiple inheritance
+
+```python
+
+class MockSessionFactory(SessionFactory):
+
+    def create_engine_and_session(self):
+        engine = Mock()
+        session = Mock()
+        # Setup mocks
+        return engine, session
+
+
+class MockedBookingFactory(BookingFactory, MockSessionFactory):
+    pass
+```
+
++++
+### Multiple inheritance
+
+Consider as an alternative
+
+Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
+
++++
 @transition[none]
 @snap[north]
 <h3>Dependency injection</h3>
@@ -659,27 +690,64 @@ For example, you could isolate some hard-to-test logic (e.g., a 3rd party servic
 Flask allows you to write isolated extensions with ease, in pytest you can reuse and parametrize fixtures in tests.
 
 ---
-## Multiple inheritance
-
-```python
-
-```
-
-Consider as an alternative
-
-Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
-
----
 ## Database
 
-### New database for each testcase
-### + pytest example
+### New database for each testcase with `testing.postgresql`
+
+```python
+import pytest
+import testing.postgresql
+
+
+@pytest.fixture
+def db_uri():
+    with testing.postgresql.Postgresql() as db:
+        yield db.url()
+
+
+@pytest.fixture
+def db(db_uri):
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    database.db.init_app(app)
+    database.db.create_all()    
+    yield database.db
+    database.db.drop_all()
+```
 
 ---
 ## Database
 
 ### Truncate all data for each testcase
-### + pytest example
+
+```python
+import pytest
+import testing.postgresql
+
+
+@pytest.fixture(scope="session")
+def db_uri():
+    with testing.postgresql.Postgresql() as db:
+        yield db.url()
+
+
+@pytest.fixture(scope="session")
+def db(db_uri):
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    database.db.init_app(app)
+    database.db.create_all()    
+    yield database.db
+    database.db.drop_all()
+
+
+@pytest.fixture(autouse=True)
+def session(db):
+    yield db.session
+    for table in reversed(db.metadata.sorted_tables):
+        db.session.execute(table.delete())
+    db.session.commit()
+```
 
 ---
 ## Database
@@ -687,71 +755,25 @@ Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
 ### Wrap each testcase into transaction
 ### + pytest example
 
+```python
+@pytest.fixture(autouse=True)
+def session(db):
+    db.session.begin_nested()
+    yield db.session
+    db.session.rollback()
+    db.session.remove()
+```
+
 ---
-@transition[none]
-@snap[north]
-<h3>Data & logic separation</h3>
-@snapend
+## Database
 
-Note:
-When you’re writing tests, usually you use some values as an input for your testing logic, and you expect some other values to be an output of this logic
-
-+++
-@transition[none]
-@snap[north]
-<h3>Data & logic separation</h3>
-@snapend
-
-```python
-def test_something():
-    assert something('a', 'b') == 'c'
-```
-
-Note:
-But when you hardcode them inside the testing code, it makes it less extendable. 
-If you keep test data separate from the test logic, it will make modifications much more manageable. 
-Dependency injection’s back in the game!
-
-+++
-@transition[none]
-@snap[north]
-<h3>Data & logic separation</h3>
-@snapend
-
-```python
-@pytest.mark.parametrize(
-    'first, second, expected', 
-    (
-        ('a', 'b', 'c'), 
-        ('b', 'a', 'd')
-    )
-)
-def test_something(first, second, expected):
-    assert something(first, second) == expected
-```
-
-Note:
-Here you have pytest parametrisation and you can easily add new test cases.
-
-+++
-@transition[none]
-@snap[north]
-<h3>Data & logic separation</h3>
-@snapend
-
-@ul
-- @color[black](Easier to add new test cases)
-- @color[black](Easier to refactor tests)
-@ulend
-
-Note:
-It is especially helpful if you have an extensive test suite — it can help you see similarities in your tests and 
-refactor them or build some reusable tools, that might help you in the future.
+### Consider using `pytest-pgsql`
+### It includes implementation of transactional and non-transactional cases
 
 ---
 @transition[none]
 @snap[north]
-<h3>More factories</h3>
+<h3>Factories</h3>
 @snapend
 
 ##### `factoryboy`

@@ -630,7 +630,60 @@ class TestConnectionPool(object):
 ### Benefits
 
 ---
-### Multiple inheritance 
+### Multiple inheritance
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from .models import Booking
+
+
+class SessionFactory:
+
+    def __init__(self, db_uri):
+        self.db_uri = db_uri
+
+    def create_engine_and_session(self):
+        engine = create_engine(self.db_uri)
+        session = sessionmaker(bind=engine)
+        session = scoped_session(session)
+        return engine, session
+
+
+class BookingFactory(SessionFactory):
+
+    def create_booking(self, data):
+        session = self.create_engine_and_session()
+        booking = Booking(**data)
+        session.add(booking)
+        session.commit()
+```
+
++++
+### Multiple inheritance
+
+```python
+
+class MockSessionFactory(SessionFactory):
+
+    def create_engine_and_session(self):
+        engine = Mock()
+        session = Mock()
+        # Setup mocks
+        return engine, session
+
+
+class MockedBookingFactory(BookingFactory, MockSessionFactory):
+    pass
+```
+
++++
+### Multiple inheritance
+
+Consider as an alternative
+
+Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
 
 ---
 ### DB 1, 2, 3

@@ -390,19 +390,241 @@ Objects will not be kept only because it is cached somewhere.
 
 ----------------------------------
 ---
-### App factory
+@transition[none]
+@snap[north]
+<h3>Application factory</h3>
+@snapend
+
+```python
+# app.py
+def create_app(settings_object, **kwargs):
+    flask_app = Flask(__name__)
+    flask_app.config.from_object(settings_object)
+    flask_app.config.update(**kwargs)
+
+    from .database import db
+
+    db.init_app(flask_app)
+    db.app = flask_app
+
+    return flask_app
+
+# conftest.py
+from app import create_app
+
+
+@pytest.fixture(scope="session")
+def app():
+    return create_app("app.settings.TestSettings")
+
+
+@pytest.fixture(scope="session")
+def db(app):
+    # Create extensions, tables, etc
+    yield database.db
+    # Drop tables, extensions, etc
+```
+
+@[1-12](Application factory)
+@[13-26])(New shiny fixtures)
+
+Note:
+However, application is still global, and it initializes on import. 
+If we didn’t initialise the DB before running the tests, it wouldn’t work. 
+To address this problem the application factory pattern exists.
+The basic idea is to isolate the application instance creation in a separate function.
+
++++
+@transition[none]
+@snap[north]
+<h3>Application factory</h3>
+@snapend
+
+@ul
+- @color[black](Isolation. An application instance is created after the test session starts)
+- @color[black](Flexibility. Parametrise with different setting)
+@ulend
+
+Note:
+- Isolate the side-effects of creating an application on the module-level. 
+- Flexibility — multiple apps and/ore different settings. It’s available as a fixture, which provides more flexibility (e.g., parametrization)
 
 ---
 ### Pytest for factories
 
 ---
-### Factory boy
+@transition[none]
+@snap[north]
+<h3>Factory boy</h3>
+@snapend
+
+##### `factoryboy`
+
+```python
+class User(Base):
+    id = Column(Integer(), primary_key=True)
+    name = Column(Unicode(20))
+
+
+class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = User
+        sqlalchemy_session = session   # the SQLAlchemy session object
+
+    id = factory.Sequence(lambda n: n)
+    name = 'John Doe'
+```
+
+Note:
+But what if the object you’re testing is more complicated than a string? SQLAlchemy model for example. 
+You could create them manually in a separate fixture, or you could use something like factory-boy.
+
++++
+@transition[none]
+@snap[north]
+<h3>More factories</h3>
+@snapend
+
+##### `factoryboy`
+
+```python
+>>> UserFactory()
+<User: User 1>
+>>> session.query(User).all()
+[<User: User 1>]
+```
+
++++
+@transition[none]
+@snap[north]
+<h3>More factories</h3>
+@snapend
+
+##### `pytest-factoryboy`
+
+```python
+from pytest_factoryboy import register
+
+
+@register
+class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
+    ...
+```
+
+Note:
+Factory boy is very well integrated with py.test the with absolutely gorgeous pytest-factoryboy. 
+Just register your factories and make sure that they’re imported in your test suite (in the root conftest.py, for example):
+
++++
+@transition[none]
+@snap[north]
+<h3>More factories</h3>
+@snapend
+
+##### `pytest-factoryboy`
+
+```python
+def test_model_fixture(user):
+    assert user.name == 'John Doe'
+
+
+def test_factory_fixture(user_factory):
+    assert user_factory().name == 'John Doe'
+```
+
+Note:
+and now you magically have user and user_factory fixtures.
+The user fixture corresponds to a simple factory call without arguments.
+
++++
+@transition[none]
+@snap[north]
+<h3>More factories</h3>
+@snapend
+
+Check out `pytest-factoryboy`
+
+https://github.com/pytest-dev/pytest-factoryboy
+
+Note:
+pytest-factoryboy provides a lot of different features that are worth checking out.
 
 ---
-### Dependency injection
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
 
----
-### Examples flask-sqlalchemy / redis-py
+```python
+def create_booking(session, data):
+    booking = Booking(**data)
+    session.add(booking)
+    session.commit()
+```
+
+Note:
+There is another technique that was used in the previous examples but wasn’t mentioned explicitly. Dependency injection.
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+### Flask example + Flask-SQLAlchemy
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+### Redis-py connection pool + tests
+
+```python
+class StrictRedis(object):
+
+    def __init__(self, connection_pool=None, **kwargs):
+        if not connection_pool:
+            ...
+            connection_pool = ConnectionPool(**kwargs)
+        self.connection_pool = connection_pool
+```
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+### Redis-py connection pool
+
+#### Tests
+```python
+class DummyConnection(object):
+    description_format = "DummyConnection<>"
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.pid = os.getpid()
+
+
+class TestConnectionPool(object):
+    def get_pool(self, connection_kwargs=None, max_connections=None,
+                 connection_class=DummyConnection):
+        connection_kwargs = connection_kwargs or {}
+        return redis.ConnectionPool(
+            connection_class=connection_class,
+            max_connections=max_connections,
+            **connection_kwargs)
+
+    def test_connection_creation(self):
+        connection_kwargs = {'foo': 'bar', 'biz': 'baz'}
+        pool = self.get_pool(connection_kwargs=connection_kwargs)
+        connection = pool.get_connection('_')
+        assert isinstance(connection, DummyConnection)
+        assert connection.kwargs == connection_kwargs
+```
 
 ---
 ### Benefits

@@ -101,8 +101,25 @@ Then module object will be created and initialized with certain attributes from 
 Then the module is cached, executed and returned. 
 If any errors will occur during the execution, only requested module will be removed from the cache.
 
----
++++
 ### Key points
+
+- Module is an object
+- Module's code is executed and attributes are evaluated in a certain context
+- Modules are cached
+- The cache could be modified even if an error occurs
+
+Note:
+If some module is required in two different tests, then it will be executed in a context of the first test and then 
+it will be taken from cache in the second test, unless it is not reloaded.
+It could lead to various issues if the second test module requires different context to be tested.
+
++++
+### More information
+
+- Source: https://github.com/python/cpython/blob/master/Lib/importlib/_bootstrap.py
+- Docs: https://docs.python.org/3/reference/import.html
+- PEP: https://www.python.org/dev/peps/pep-0451/
 
 ---
 ### Unit tests examples

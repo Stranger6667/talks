@@ -627,7 +627,21 @@ class TestConnectionPool(object):
 ```
 
 ---
-### Benefits
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+@ul
+- @color[black](Decoupling execution from implementation)
+- @color[black](Easier to mock heavy dependencies)
+@ulend
+
+Note:
+Applying this approach allows you to decouple the execution of a task from its implementation.
+Now, you can pass any engine you want to the airplane and test its logic with different engines, or mock your engine to see if it’s too heavy for an ordinary test.
+For example, you could isolate some hard-to-test logic (e.g., a 3rd party service or some heavy computations) in this “dependency” and pass a mock object in tests instead of the real one.
+Flask allows you to write isolated extensions with ease, in pytest you can reuse and parametrize fixtures in tests.
 
 ---
 ### Multiple inheritance
@@ -686,7 +700,85 @@ Consider as an alternative
 Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
 
 ---
-### DB 1, 2, 3
+## Database
+
+### New database for each testcase with `testing.postgresql`
+
+```python
+import pytest
+import testing.postgresql
+
+
+@pytest.fixture
+def db_uri():
+    with testing.postgresql.Postgresql() as db:
+        yield db.url()
+
+
+@pytest.fixture
+def db(db_uri):
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    database.db.init_app(app)
+    database.db.create_all()    
+    yield database.db
+    database.db.drop_all()
+```
+
+---
+## Database
+
+### Truncate all data for each testcase
+
+```python
+import pytest
+import testing.postgresql
+
+
+@pytest.fixture(scope="session")
+def db_uri():
+    with testing.postgresql.Postgresql() as db:
+        yield db.url()
+
+
+@pytest.fixture(scope="session")
+def db(db_uri):
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    database.db.init_app(app)
+    database.db.create_all()    
+    yield database.db
+    database.db.drop_all()
+
+
+@pytest.fixture(autouse=True)
+def session(db):
+    yield db.session
+    for table in reversed(db.metadata.sorted_tables):
+        db.session.execute(table.delete())
+    db.session.commit()
+```
+
+---
+## Database
+
+### Wrap each testcase into transaction
+### + pytest example
+
+```python
+@pytest.fixture(autouse=True)
+def session(db):
+    db.session.begin_nested()
+    yield db.session
+    db.session.rollback()
+    db.session.remove()
+```
+
+---
+## Database
+
+### Consider using `pytest-pgsql`
+### It includes implementation of transactional and non-transactional cases
 
 ---
 ### Speed up the test suite

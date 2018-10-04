@@ -35,8 +35,7 @@ If we are starting with a fresh new project, then why not do things right (again
 ---
 ## Testing aspects and goals
 
-- @color[black](Isolation)
-- @color[black](Independence)
+- @color[black](Isolation & Independence)
 - @color[black](Repeatability)
 - @color[black](Speed)
 
@@ -52,7 +51,7 @@ These principles apply to different testing levels.
 For unittests when you’re testing small, independent units of your code and as well for integration tests.
 
 ---
-### Applying these aspects at scale
+### Scale
 
 - 400+ developers 
 - 250+ active repositories
@@ -65,9 +64,7 @@ Company is big, many developers, speed of getting a feedback is important, multi
 ---
 ### Human factor
 
-- Mindset
-- Testable code
-- Tests
+Mindset > Testability > Tests
 
 Note:
 Ideas
@@ -182,16 +179,6 @@ What do you think, is it a real code?
 ## Problems & alternatives
 
 ---
-### What is wrong
-
-#### Global variables
-
-Note:
-To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
-what happens when you use a module with a global variable in its namespace. 
-To understand this lets' look how the Python import system works. 
-
----
 ### Global settings
 
 ```python
@@ -201,6 +188,11 @@ import os
 DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
+
+Note:
+To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
+what happens when you use a module with a global variable in its namespace. 
+To understand this lets' look how the Python import system works. 
 
 ---
 ### What happens during import
@@ -276,7 +268,7 @@ def test_create_db_with_cert(monkeypatch):
 ```python
 from .database import create_db
 
-
+ 
 def test_create_db_with_cert():
     engine, session = create_db("some uri", ssl_cert_path="/path/to/cert.pem")
     # assert the output
@@ -802,14 +794,6 @@ There is another technique that was used in the previous examples but wasn’t m
 <h3>Dependency injection</h3>
 @snapend
 
-### Flask example + Flask-SQLAlchemy
-
-+++
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
-
 ### Redis-py connection pool + tests
 
 ```python
@@ -1009,27 +993,27 @@ def session(db):
 ### Database
 
 ### Consider using `pytest-pgsql`
-### It includes implementation of transactional and non-transactional cases
+
+https://github.com/CloverHealth/pytest-pgsql
 
 ---
 ### Speed up the test suite
-Optimize db, put in memory
-Split, parallelize
+
+- Put DB in RAM
+- Disable DB logs
+- Split your test suite
+- Run in parallel
 
 ---
 ## Results
 
----
-### What happened to our test suite speed
+- Simpler codebase
+- Less unused code
+- Faster tests
+- Faster code review
 
 ---
-### Coverage
+## Thank you
 
-Remove unused branches
-
----
-### MR review time
-
----
-### How to treat tests & testability
- 
+- https://github.com/Stranger6667
+- https://twitter.com/Stranger6667

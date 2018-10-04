@@ -322,6 +322,26 @@ class override_settings(TestContextDecorator):
 Note:
 With lazy approach we can override a global settings object without even loading the actual settings.
 
++++
+### Lazy settings. Django example
+
+```python
+# database.py
+from .conf import settings
+
+...
+
+# test_db.py
+from .utils import override_settings
+
+
+@override_settings(SSL_CERTIFICATE_PATH="/path/to/cert.pem")
+def test_create_db_with_cert():
+    from .database import create_db
+    engine, session = create_db("some uri", ssl_cert_path="/path/to/cert.pem")
+    # assert the output
+
+```
 ---
 ### Global DB session
 

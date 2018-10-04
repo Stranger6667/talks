@@ -1,4 +1,4 @@
-### @color[orange](Rethinking your testing practices)
+### @color[orange](Rethinking testing practices)
 
 #### Avoid shooting yourself in the foot
 
@@ -26,15 +26,14 @@ If we are starting with a fresh new project, then why not do things right (again
 --- 
 ### Overview
 
-Structure. We will talk about:
-- Goals
-- Previous / Current state 
-- Particular tech problems + alternatives
-- General problems + improvements 
+- Testing aspects
+- Previous state
+- Problems & alternatives
+- Next steps 
 - Results
 
 ---
-### Testing aspects. 
+## Testing aspects 
 
 ---
 ### Applying these aspects at scale
@@ -44,7 +43,9 @@ Our scale and importance of testing
 ---
 ### Human factor
 
-----------------------
+---
+## Previous state
+
 ---
 ### Code example
 
@@ -53,6 +54,9 @@ Our scale and importance of testing
 
 ---
 ### Running example
+
+---
+## Problems & alternatives
 
 ---
 ### What is wrong
@@ -388,7 +392,9 @@ Your global variable could be accessed by different threads - use locks and thre
 If you want to cache something - consider having weak references. 
 Objects will not be kept only because it is cached somewhere.
 
-----------------------------------
+---
+## Next steps
+
 ---
 @transition[none]
 @snap[north]
@@ -760,7 +766,7 @@ def session(db):
 ```
 
 ---
-## Database
+### Database
 
 ### Wrap each testcase into transaction
 ### + pytest example
@@ -775,7 +781,7 @@ def session(db):
 ```
 
 ---
-## Database
+### Database
 
 ### Consider using `pytest-pgsql`
 ### It includes implementation of transactional and non-transactional cases
@@ -784,6 +790,9 @@ def session(db):
 ### Speed up the test suite
 Optimize db, put in memory
 Split, parallelize
+
+---
+## Results
 
 ---
 ### What happened to our test suite speed

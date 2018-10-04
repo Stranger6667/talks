@@ -66,7 +66,7 @@ Company is big, many developers, speed of getting a feedback is important, multi
 ### Human factor
 
 - Mindset
-- Code design
+- Testable code
 - Tests
 
 Note:
@@ -83,9 +83,7 @@ I'll provide you with an example of how some parts of our codebase looked like a
 some details how it was working and what is wrong with this.
 
 ---
-### Code example
-
-##### Stack
+### Stack
 
 - Python 2.7 / 3.6 / 3.7
 - Flask + connexion
@@ -102,7 +100,12 @@ some details how it was working and what is wrong with this.
 import os
 
 DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
+
+Note:
+We have a web application that works with database and we need to test it.
+We have a separate module with settings, that are evaluated during the first import.
 
 +++
 ### Code example
@@ -117,14 +120,20 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from . import settings
 
 
-def _create_db(uri):
+def create_db(uri):
+    connect_args = {"application_name": settings.APP_NAME}
+    if settings.SSL_CERTIFICATE_PATH:
+        connect_args["sslrootcert"] = settings.SSL_CERTIFICATE_PATH
     engine = create_engine(uri)
     session = sessionmaker(bind=engine)
     session = scoped_session(session)
     return engine, session
 
-engine, session = _create_db(settings.DB_URI)
+engine, session = create_db(settings.DB_URI)
 ```
+
+Note:
+We have globally defined engine and session. The session is used in other parts of the code.
 
 +++
 ### Code example
@@ -146,12 +155,28 @@ def create_booking(data):
 def get_booking(id):
     return session.query(Booking).get(id)
 ```
++++
+### Code example
 
----
-### Tests example
+##### Application
 
----
-### Running example
+```python
+# app.py
+from connexion.apps.flask_app import FlaskApp
+from connexion.resolver import RestyResolver
+
+
+connexion_app = FlaskApp(__package__)
+connexion_app.add_api(
+    "path/to/schema.yml",
+    validate_responses=True,
+    strict_validation=True,
+    resolver=RestyResolver("path.to.handlers"),
+)
+```
+
+Note:
+What do you think, is it a real code?
 
 ---
 ## Problems & alternatives
@@ -159,8 +184,23 @@ def get_booking(id):
 ---
 ### What is wrong
 
+#### Global variables
+
+Note:
+To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
+what happens when you use a module with a global variable in its namespace. 
+To understand this lets' look how the Python import system works. 
+
 ---
 ### Global settings
+
+```python
+# settings.py
+import os
+
+DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
+```
 
 ---
 ### What happens during import
@@ -169,13 +209,6 @@ def get_booking(id):
 # Check the cache
 if name in sys.modules:
     return sys.modules[name]
-
-# Load parent modules if exist
-if has_parents(name):
-    load_parents()
-    # Check the cache again
-    if name in sys.modules:
-        return sys.modules[name]
 
 # Find a module spec
 spec = find_spec(name)
@@ -226,16 +259,88 @@ It could lead to various issues if the second test module requires different con
 ---
 ### Unit tests examples
 
-#### Ugly examples of unit tests for functions, that use global settings
+```python
+import settings
+from .database import create_db
 
----
-### Lazy settings. Django example
+
+def test_create_db_with_cert(monkeypatch):
+    monkeypatch.setattr(settings, "SSL_CERTIFICATE_PATH", "/path/to/cert.pem")
+    engine, session = create_db("some uri")
+    # assert the output
+```
 
 ---
 ### Explicit parameters
 
+```python
+from .database import create_db
+
+
+def test_create_db_with_cert():
+    engine, session = create_db("some uri", ssl_cert_path="/path/to/cert.pem")
+    # assert the output
+```
+
+---
+### Lazy settings. Django example
+
+```
+# django/conf/__init__.py
+
+class LazySettings(LazyObject):
+    def _setup(self, name=None):
+        """Load from env var. Called on first access if not configured already."""
+        settings_module = ...
+        self._wrapped = Settings(settings_module)
+        
+    def configure(self, default_settings=global_settings, **options):
+        """Manual configuration."""
+        if self._wrapped is not empty:
+            raise RuntimeError('Settings already configured.')
+        holder = UserSettingsHolder(default_settings)
+        for name, value in options.items():
+            setattr(holder, name, value)
+        self._wrapped = holder
+
+settings = LazySettings()
+```
+
+Note:
+In the case if you need to use some global settings it is much better to keep them lazy like it is done in Django for example.
+
++++
+### Lazy settings. Django example
+
+```
+# django/test/utils.py
+
+class override_settings(TestContextDecorator):
+
+    def __init__(self, **kwargs):
+        self.options = kwargs
+
+    def enable(self):
+        ...
+
+    def disable(self):
+        ...
+```
+
+Note:
+With lazy approach we can override a global settings object without even loading the actual settings.
+
 ---
 ### Global DB session
+
+```python
+# database.py
+engine, session = create_db(settings.DB_URI)
+```
+
+Note:
+Unfortunately the settings are accessed on the module level and we need to override it before the module is loaded.
+We could apply a similar approach to the DB session, but before that let's look how does it work.
 
 +++
 ### How session works
@@ -265,7 +370,6 @@ for meth in Session.public_methods:
 ```
 
 Note:
-To understand what is going on during these tests, lets look at how the SQLAlchemy session works.
 Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
 initializes the factory lazily as well. 
 
@@ -320,6 +424,23 @@ If the requested data has already been loaded from the database, the identity ma
 of the already instantiated object, but if it has not been loaded yet, it loads it and stores the new object in the map.
 
 ---
+### Handlers tests
+
+```python
+from .handlers import create_booking, get_booking
+
+
+def test_create_booking():
+    email = "test@test.com"
+    booking = create_booking(email=email)
+    assert booking.email == email
+
+
+def test_get_booking():
+    assert get_booking(1) is None
+```
+
+---
 ### State after the first test
 
 - Identity map is modified
@@ -330,6 +451,28 @@ The new booking, created during the first test is saved in the identity map and 
 This breaks isolation of our test cases.
 Sometimes some of these issues could be acceptable or they could be managed with some framework (like Django test suite)
 But if you want to implement global entities by yourself you should at least be aware of the following aspects.
+
+---
+### Globals check list
+
+- Module caching
+- Different contexts
+- Laziness
+- Thread-safety
+- Weak references
+
+Note:
+All your modules are executed and cached. The context of execution could be not exactly what you need.
+Laziness plays well, it postpones evaluation until the very last moment and at least you have more control over it.
+Your global variable could be accessed by different threads - use locks and thread-local storage for that
+If you want to cache something - consider having weak references. 
+Objects will not be kept only because it is cached somewhere.
+
+---
+### How to handle all of this?
+
+Note:
+Let's go from ad-hoc solutions to something better.
 
 ---
 ### Monkey-patching
@@ -475,25 +618,6 @@ As a consequence, we don’t have to initialise another database connection in t
 We’re managing this global state.
 
 ---
-### Globals check list
-
-- Module caching
-- Different contexts
-- Laziness
-- Thread-safety
-- Weak references
-
-Note:
-All your modules are executed and cached. The context of execution could be not exactly what you need.
-Laziness plays well, it postpones evaluation until the very last moment and at least you have more control over it.
-Your global variable could be accessed by different threads - use locks and thread-local storage for that
-If you want to cache something - consider having weak references. 
-Objects will not be kept only because it is cached somewhere.
-
----
-## Next steps
-
----
 @transition[none]
 @snap[north]
 <h3>Application factory</h3>
@@ -552,6 +676,9 @@ The basic idea is to isolate the application instance creation in a separate fun
 Note:
 - Isolate the side-effects of creating an application on the module-level. 
 - Flexibility — multiple apps and/ore different settings. It’s available as a fixture, which provides more flexibility (e.g., parametrization)
+
+---
+## Next steps
 
 ---
 ### Pytest for factories

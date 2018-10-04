@@ -553,7 +553,7 @@ Note:
 In large projects, it could lead to monkey patching a significant amount of different modules.
 
 ---
-### Make it better
+### There is a better way
 
 Note:
 The global state in the previous examples is hardly predictable. Let’s change it and make it manageable.
@@ -576,8 +576,6 @@ Also, it used to register some teardown logic for this global object.
 @snap[north]
 <h3>Deferred initialization</h3>
 @snapend
-
-##### `Flask-SQLAlchemy` 
 
 ```python
 # database.py
@@ -607,8 +605,10 @@ def session(db):
     db.session.remove()
 ```
 
-@[1-13](Database & Application)
-@[15-31])(New shiny fixtures)
+@[1-5](Database)
+@[6-31])(New shiny fixtures)
+
+##### `Flask-SQLAlchemy` 
 
 Note:
 This is how it could be changed with `Flask-SQLAlchemy` extension.
@@ -695,6 +695,37 @@ Note:
 ---
 ### Pytest for factories
 
+```python
+class User(Base):
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(20))
+```
+
++++
+### Pytest for factories
+
+```python
+@pytest.fixture
+def user_factory():
+
+    defaults = {
+        "name": "John Doe"
+    }
+
+    def _factory(**kwargs):
+        return User(**{**defaults, **kwargs})
+
+    return _factory
+
+```
+
++++
+### Pytest for factories
+
+```python
+def test_factory_fixture(user_factory):
+    assert user_factory().name == 'John Doe'
+```
 ---
 @transition[none]
 @snap[north]
@@ -704,11 +735,6 @@ Note:
 ##### `factoryboy`
 
 ```python
-class User(Base):
-    id = Column(Integer(), primary_key=True)
-    name = Column(Unicode(20))
-
-
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User

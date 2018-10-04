@@ -26,28 +26,126 @@ If we are starting with a fresh new project, then why not do things right (again
 --- 
 ### Overview
 
-- Testing aspects
+- Testing aspects and goals
 - Previous state
 - Problems & alternatives
 - Next steps 
 - Results
 
 ---
-## Testing aspects 
+## Testing aspects and goals
+
+- @color[black](Isolation)
+- @color[black](Independence)
+- @color[black](Repeatability)
+- @color[black](Speed)
+
+Note:
+There a couple of aspects, that are crucial for building any test suite
+
+- Tests should not interfere with each other
+- You should be able to run any subset of your tests in any order
+- You should be able to easily reproduce any test failure
+- You should be able to get these results fast
+
+These principles apply to different testing levels.
+For unittests when you’re testing small, independent units of your code and as well for integration tests.
 
 ---
 ### Applying these aspects at scale
 
-Our scale and importance of testing
+- 400+ developers 
+- 250+ active repositories
+- Many thousands of tests
+
+Note:
+Ideas:
+Company is big, many developers, speed of getting a feedback is important, multiply delay by number of devs working on a project
 
 ---
 ### Human factor
 
+- Mindset
+- Code design
+- Tests
+
+Note:
+Ideas
+The most important thing is the mindset you have when developing something. 
+Then it naturally comes to testable code.
+Then tests will come naturally.
+
 ---
 ## Previous state
 
+Note:
+I'll provide you with an example of how some parts of our codebase looked like a couple of months before and tell you
+some details how it was working and what is wrong with this.
+
 ---
 ### Code example
+
+##### Stack
+
+- Python 2.7 / 3.6 / 3.7
+- Flask + connexion
+- SQLAlchemy
+- PostgreSQL
+- Pytest
+
++++
+### Code example
+##### Settings
+
+```python
+# settings.py
+import os
+
+DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+```
+
++++
+### Code example
+
+##### Database
+
+```python
+# database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from . import settings
+
+
+def _create_db(uri):
+    engine = create_engine(uri)
+    session = sessionmaker(bind=engine)
+    session = scoped_session(session)
+    return engine, session
+
+engine, session = _create_db(settings.DB_URI)
+```
+
++++
+### Code example
+
+##### Requests handlers
+
+```python
+# handlers.py
+from .database import session
+from .models import Booking
+
+
+def create_booking(data):
+    booking = Booking(**data)
+    session.add(booking)
+    session.commit()
+
+
+def get_booking(id):
+    return session.query(Booking).get(id)
+```
 
 ---
 ### Tests example
@@ -803,7 +901,7 @@ Split, parallelize
 Remove unused branches
 
 ---
-### MR review time.
+### MR review time
 
 ---
 ### How to treat tests & testability

@@ -395,7 +395,7 @@ Also, it used to register some teardown logic for this global object.
 +++
 @transition[none]
 @snap[north]
-<h3>After</h3>
+<h3>Deferred initialization</h3>
 @snapend
 
 ##### `Flask-SQLAlchemy` 
@@ -616,7 +616,7 @@ class TestConnectionPool(object):
         assert connection.kwargs == connection_kwargs
 ```
 
-+++
+---
 ### Multiple inheritance
 
 ```python

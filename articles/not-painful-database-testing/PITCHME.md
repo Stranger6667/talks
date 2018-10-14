@@ -388,7 +388,7 @@ Let's go from ad-hoc solutions to something better.
 # conftest.py
 import database
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def db():
     engine = create_engine(
         "postgresql://127.0.0.1/another_db"
@@ -409,7 +409,7 @@ def db():
 @pytest.fixture
 def session(db, monkeypatch):
     db.begin_nested()
-    monkeypatch.setattr(database, 'db', db)
+    monkeypatch.setattr(database, "db", db)
 
     yield db
 

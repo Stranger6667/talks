@@ -39,6 +39,7 @@ If we are starting with a fresh new project, then why not do things right (again
 - @color[black](Воспроизводимость)
 - @color[black](Скорость)
 
+---
 ### Stack
 
 - Python 2.7 / 3.6 / 3.7
@@ -55,7 +56,11 @@ If we are starting with a fresh new project, then why not do things right (again
 # settings.py
 import os
 
-DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+DB_URI = os.environ.get(
+  "DB_URI", 
+  "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+)
+
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
 
@@ -72,15 +77,16 @@ We have a separate module with settings, that are evaluated during the first imp
 # database.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-
 from . import settings
 
-
 def create_db(uri):
-    connect_args = {"application_name": settings.APP_NAME}
+    args = {"application_name": settings.APP_NAME}
     if settings.SSL_CERTIFICATE_PATH:
-        connect_args["sslrootcert"] = settings.SSL_CERTIFICATE_PATH
-    engine = create_engine(uri)
+        args["sslrootcert"] = settings.SSL_CERTIFICATE_PATH
+    engine = create_engine(
+        uri,
+        connect_args=args
+    )
     session = sessionmaker(bind=engine)
     session = scoped_session(session)
     return engine, session
@@ -125,8 +131,6 @@ from connexion.resolver import RestyResolver
 connexion_app = FlaskApp(__package__)
 connexion_app.add_api(
     "path/to/schema.yml",
-    validate_responses=True,
-    strict_validation=True,
     resolver=RestyResolver("path.to.handlers"),
 )
 ```
@@ -161,7 +165,11 @@ def test_get_booking():
 # settings.py
 import os
 
-DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+DB_URI = os.environ.get(
+    "DB_URI", 
+    "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+)
+
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
 
@@ -242,13 +250,20 @@ class scoped_session(object):
         self.session_factory = session_factory
 
         if scopefunc:
-            self.registry = ScopedRegistry(session_factory, scopefunc)
+            self.registry = ScopedRegistry(
+                session_factory, 
+                scopefunc
+            )
         else:
-            self.registry = ThreadLocalRegistry(session_factory)
+            self.registry = ThreadLocalRegistry(
+                session_factory
+            )
             
 def instrument(name):
     def do(self, *args, **kwargs):
-        return getattr(self.registry(), name)(*args, **kwargs)
+        return getattr(
+            self.registry(), name
+        )(*args, **kwargs)
     return do
 
 
@@ -408,13 +423,10 @@ After some time your tests will finish, but Facebook on your tab will not.
 
 <img src="articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/fix-problem.jpg" alt="Fix problem" width="600px"/>
 
-Note:
-In large projects, it could lead to monkey patching a significant amount of different modules.
-
----
 ### There is a better way
 
 Note:
+In large projects, it could lead to monkey patching a significant amount of different modules.
 The global state in the previous examples is hardly predictable. Let’s change it and make it manageable.
 The first step is to take control when the object is initialised. 
 We want to initialise it only when we need it; just in the desired context.
@@ -433,7 +445,7 @@ Also, it used to register some teardown logic for this global object.
 +++
 @transition[none]
 @snap[north]
-<h3>Deferred initialization</h3>
+<h4>Deferred initialization</h3>
 @snapend
 
 ```python
@@ -480,8 +492,8 @@ Now the database is initialised only when the application initialises — we
 @snapend
 
 @ul
-- @color[black](Manageable DB initialization)
-- @color[black](No monkeypatching)
+- @color[black](Управляемая инициализация базы)
+- @color[black](Нет monkey-patching'а)
 @ulend
 
 Note:
@@ -552,9 +564,9 @@ Note:
 ## Next steps
 
 ---
-## Database
+### Database
 
-### New database for each testcase with `testing.postgresql`
+#### New database for each testcase with `testing.postgresql`
 
 ```python
 import pytest
@@ -578,9 +590,9 @@ def db(db_uri):
 ```
 
 ---
-## Database
+### Database
 
-### Truncate all data for each testcase
+#### Truncate all data for each testcase
 
 ```python
 import pytest
@@ -614,7 +626,7 @@ def session(db):
 ---
 ### Database
 
-### Wrap each testcase into transaction
+#### Wrap each testcase into transaction
 
 ```python
 @pytest.fixture(autouse=True)
@@ -628,7 +640,7 @@ def session(db):
 ---
 ### Database
 
-### Consider using `pytest-pgsql`
+#### Consider using `pytest-pgsql`
 
 https://github.com/CloverHealth/pytest-pgsql
 
@@ -636,7 +648,7 @@ https://github.com/CloverHealth/pytest-pgsql
 ### Speed up the test suite
 
 - База в памяти
-- Отключить логи
+- Отключение логов
 - Шаблоны базы / переиспользование существующей
 - Разделение и параллельное выполнение
 

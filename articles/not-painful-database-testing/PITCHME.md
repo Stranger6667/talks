@@ -95,7 +95,8 @@ engine, session = create_db(settings.DB_URI)
 ```
 
 @[7-9]
-@[10-18]
+@[10-16]
+@[18]
 
 Note:
 We have globally defined engine and session. The session is used in other parts of the code.
@@ -149,16 +150,17 @@ What do you think, is it a real code?
 ```python
 from .handlers import create_booking, get_booking
 
-
 def test_create_booking():
     email = "test@test.com"
     booking = create_booking(email=email)
     assert booking.email == email
 
-
 def test_get_booking():
     assert get_booking(1) is None
 ```
+
+@[3-6]
+@[8-9]
 
 ---
 ## Problems & alternatives
@@ -272,17 +274,15 @@ class scoped_session:
             
 def instrument(name):
     def do(self, *args, **kwargs):
-        return getattr(
-            self.registry(), name
-        )(*args, **kwargs)
+        method = getattr(self.registry(), name)
+        return method(*args, **kwargs)
     return do
 
 for meth in Session.public_methods:
     setattr(scoped_session, meth, instrument(meth))
 ```
 
-@[1-13]
-@[10-13]
+@[11-13]
 @[15-20]
 @[21-22]
 
@@ -310,6 +310,9 @@ class ThreadLocalRegistry(ScopedRegistry):
             return val
 ```
 
+@[5]
+@[8-12]
+
 Note:
 The registry is thread-local - values will be different for separate threads.
 
@@ -335,8 +338,8 @@ class Session:
         ...
 ```
 
-@[1-8]
-@[10-14]
+@[1-7]
+@[10-13]
 
 Note:
 An identity map is basically a cache between your application code and the database. 
@@ -414,7 +417,8 @@ def session(db, monkeypatch):
     db.close()
 ```
 
-@[4-8]
+@[4-5]
+@[6-8]
 @[12-16]
 @[18]
 @[22-25]

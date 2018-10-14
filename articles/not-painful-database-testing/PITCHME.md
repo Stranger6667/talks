@@ -610,7 +610,10 @@ def db_uri():
 
 @pytest.fixture
 def app(db_uri):
-    return create_app("app.settings.TestSettings", SQLALCHEMY_DATABASE_URI=db_uri)
+    return create_app(
+        "app.settings.TestSettings", 
+        SQLALCHEMY_DATABASE_URI=db_uri
+    )
 
 @pytest.fixture
 def db(app):
@@ -621,8 +624,8 @@ def db(app):
 ```
 
 @[5-8]
-@[10-12]
-@[14-19]
+@[10-15]
+@[17-22]
 
 ---
 ### Database
@@ -666,8 +669,6 @@ def session(db):
     db.session.rollback()
     db.session.remove()
 ```
-
-@[4-9]
 
 ---
 ### Database

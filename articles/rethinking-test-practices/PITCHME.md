@@ -1024,7 +1024,6 @@ def session(db):
 ### Database
 
 ### Wrap each testcase into transaction
-### + pytest example
 
 ```python
 @pytest.fixture(autouse=True)

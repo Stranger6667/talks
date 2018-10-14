@@ -1,13 +1,13 @@
-### @color[orange](Rethinking testing practices)
+### @color[orange](Not painful testing with SQLAlchemy)
 
 #### Avoid shooting yourself in the foot
 
 ---
 ### Who am I
 
-- @color[black](Tech Lead at kiwi.com)
-- @color[black](Live in Prague, Czech Republic)
-- @color[black](Love Python & open-source)
+- @color[black](Тимлид в kiwi.com)
+- @color[black](Прага, Чехия)
+- @color[black](Python & open-source)
 
 Note:
 Hello everyone, my name is Dmitry Dygalo and I am a technical team lead at kiwi.com. 
@@ -26,17 +26,18 @@ If we are starting with a fresh new project, then why not do things right (again
 ---
 ### Overview
 
-- Testing aspects and goals
-- Previous state
-- Problems & alternatives
-- Next steps 
-- Results
+- Важные аспекты и цели тестирования
+- Что было раньше
+- Проблемы и варианты их решения
+- Следующие шаги
+- Результаты
 
 ---
 ### Aspects and goals
 
-- @color[black](Isolation & Independence)
-- @color[black](Speed)
+- @color[black](Изоляция и независимость)
+- @color[black](Воспроизводимость)
+- @color[black](Скорость)
 
 ### Stack
 
@@ -312,8 +313,9 @@ of the already instantiated object, but if it has not been loaded yet, it loads 
 ---
 ### State after the first test
 
-- Identity map is modified
-- Changes are committed to the DB
+- `settings` / `database` закешированы в `sys.modules`  
+- Identity map содержит в себе экземпляр модели
+- Изменения внесены в базу
 
 Note:
 The new booking, created during the first test is saved in the identity map and as well it is committed to the DB.
@@ -324,11 +326,11 @@ But if you want to implement global entities by yourself you should at least be 
 ---
 ### Globals check list
 
-- Module caching
-- Different contexts
-- Laziness
-- Thread-safety
-- Weak references
+- Кэширование модулей
+- Различные контексты выполнения
+- Ленивость
+- Потокобезопасность
+- Слабые ссылки
 
 Note:
 All your modules are executed and cached. The context of execution could be not exactly what you need.
@@ -385,11 +387,11 @@ Here is an example of how global objects could be handled in tests. Monkey-patch
 ### What is wrong?
 
 @ul
-- @color[black](Complexity grows very fast)
-- @color[black](Weaker tests)
-- @color[black](Decreases code coverage)
-- @color[black](Fragile test suite)
-- @color[black](Could affect test suite running time)
+- @color[black](Сложность растет очень быстро)
+- @color[black](Тесты становятся слабее)
+- @color[black](Уменьшает тестовое покрытие)
+- @color[black](Тесты легче сломать)
+- @color[black](Скорость выполнения тестов может пострадать)
 @ulend
 
 Note:
@@ -538,8 +540,8 @@ The basic idea is to isolate the application instance creation in a separate fun
 @snapend
 
 @ul
-- @color[black](Isolation. An application instance is created after the test session starts)
-- @color[black](Flexibility. Parametrise with different setting)
+- @color[black](Изоляция. Приложение создается после запуска тестовой сессии)
+- @color[black](Гибкость. Широкие возможности параметризации)
 @ulend
 
 Note:
@@ -613,7 +615,6 @@ def session(db):
 ### Database
 
 ### Wrap each testcase into transaction
-### + pytest example
 
 ```python
 @pytest.fixture(autouse=True)
@@ -634,18 +635,17 @@ https://github.com/CloverHealth/pytest-pgsql
 ---
 ### Speed up the test suite
 
-- Put DB in RAM
-- Disable DB logs
-- Split your test suite
-- Run in parallel
+- База в памяти
+- Отключить логи
+- Шаблоны базы / переиспользование существующей
+- Разделение и параллельное выполнение
 
 ---
 ## Results
 
-- Simpler codebase
-- Less unused code
-- Faster tests
-- Faster code review
+- Более простой код
+- Меньше неиспользованного кода
+- Выше скорость выполнения тестов
 
 ---
 ## Thank you

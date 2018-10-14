@@ -94,7 +94,8 @@ def create_db(uri):
 engine, session = create_db(settings.DB_URI)
 ```
 
-@[6-18]
+@[7-9]
+@[10-18]
 
 Note:
 We have globally defined engine and session. The session is used in other parts of the code.
@@ -109,16 +110,18 @@ We have globally defined engine and session. The session is used in other parts 
 from .database import session
 from .models import Booking
 
-
 def create_booking(data):
     booking = Booking(**data)
     session.add(booking)
     session.commit()
 
-
 def get_booking(id):
     return session.query(Booking).get(id)
 ```
+
+@[5-8]
+@[10-11]
+
 +++
 ### Code example
 
@@ -201,16 +204,17 @@ sys.modules[spec.name] = module
 # Execute the module
 code = get_module_code(name)
 exec(code, module.__dict__)
+
 # Return from cache
 return sys.modules[spec.name]
 ```
 
 @[1-3]
-@[4-5]
-@[7-9]
-@[11-12]
-@[14-16]
-@[18]
+@[5-6]
+@[8-10]
+@[12-13]
+@[15-17]
+@[19-20]
 
 Note:
 Python's import machinery will check for already imported module in cache first.
@@ -278,7 +282,9 @@ for meth in Session.public_methods:
 ```
 
 @[1-13]
-@[15-23]
+@[10-13]
+@[15-20]
+@[21-22]
 
 Note:
 Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
@@ -329,8 +335,8 @@ class Session:
         ...
 ```
 
-@[1-7]
-@[10-13]
+@[1-8]
+@[10-14]
 
 Note:
 An identity map is basically a cache between your application code and the database. 
@@ -381,7 +387,9 @@ import database
 
 @pytest.fixture(scope='session', autouse=True)
 def db():
-    engine = create_engine("postgresql://127.0.0.1/another_db")
+    engine = create_engine(
+        "postgresql://127.0.0.1/another_db"
+    )
 
     # Create extensions, tables, etc
 
@@ -406,11 +414,12 @@ def session(db, monkeypatch):
     db.close()
 ```
 
-@[4-6]
-@[10-14]
-@[20-23]
-@[25]
-@[27-28]
+@[4-8]
+@[12-16]
+@[18]
+@[22-25]
+@[27]
+@[29-30]
 
 Note:
 Here is an example of how global objects could be handled in tests. Monkey-patching.
@@ -495,8 +504,8 @@ def session(db):
     db.session.remove()
 ```
 
-@[4](DB instance)
-@[11-13](App fixture)
+@[2-4]
+@[11-13]
 @[15-20]
 @[22-27]
 
@@ -607,9 +616,9 @@ def db(app):
     database.db.drop_all()
 ```
 
-@[4-7]
-@[9-11]
-@[13-18]
+@[5-8]
+@[10-12]
+@[14-19]
 
 ---
 ### Database
@@ -635,7 +644,7 @@ def session(db):
 ```
 
 @[4-5]
-@[9-14]
+@[10-15]
 
 ---
 ### Database
@@ -646,11 +655,6 @@ def session(db):
 # conftest.py
 ...
 
-@pytest.fixture(scope="session")
-def db_uri():
-    ...
-
-...
 @pytest.fixture
 def session(db):
     db.session.begin_nested()
@@ -659,8 +663,7 @@ def session(db):
     db.session.remove()
 ```
 
-@[4-5]
-@[9-14]
+@[4-9]
 
 ---
 ### Database

@@ -57,8 +57,8 @@ If we are starting with a fresh new project, then why not do things right (again
 import os
 
 DB_URI = os.environ.get(
-  "DB_URI", 
-  "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+    "DB_URI", 
+    "postgresql://127.0.0.1/postgres"
 )
 
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
@@ -93,6 +93,8 @@ def create_db(uri):
 
 engine, session = create_db(settings.DB_URI)
 ```
+
+@[6-18]
 
 Note:
 We have globally defined engine and session. The session is used in other parts of the code.
@@ -167,7 +169,7 @@ import os
 
 DB_URI = os.environ.get(
     "DB_URI", 
-    "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+    "postgresql://127.0.0.1/postgres"
 )
 
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
@@ -202,6 +204,13 @@ exec(code, module.__dict__)
 # Return from cache
 return sys.modules[spec.name]
 ```
+
+@[1-3]
+@[4-5]
+@[7-9]
+@[11-12]
+@[14-16]
+@[18]
 
 Note:
 Python's import machinery will check for already imported module in cache first.
@@ -243,12 +252,10 @@ We could apply a similar approach to the DB session, but before that let's look 
 ##### It is lazy
 
 ```python
-class scoped_session(object):
-    session_factory = None
+class scoped_session:
 
     def __init__(self, session_factory, scopefunc=None):
-        self.session_factory = session_factory
-
+        ...
         if scopefunc:
             self.registry = ScopedRegistry(
                 session_factory, 
@@ -266,10 +273,12 @@ def instrument(name):
         )(*args, **kwargs)
     return do
 
-
 for meth in Session.public_methods:
     setattr(scoped_session, meth, instrument(meth))
 ```
+
+@[1-13]
+@[15-23]
 
 Note:
 Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
@@ -320,6 +329,9 @@ class Session:
         ...
 ```
 
+@[1-7]
+@[10-13]
+
 Note:
 An identity map is basically a cache between your application code and the database. 
 If the requested data has already been loaded from the database, the identity map returns the same instance 
@@ -367,10 +379,9 @@ Let's go from ad-hoc solutions to something better.
 # conftest.py
 import database
 
-
 @pytest.fixture(scope='session', autouse=True)
-def db_schema(db_uri):
-    engine = create_engine(db_uri)
+def db():
+    engine = create_engine("postgresql://127.0.0.1/another_db")
 
     # Create extensions, tables, etc
 
@@ -384,16 +395,22 @@ def db_schema(db_uri):
     # Drop tables, extensions, etc
 
 
-@pytest.fixture(autouse=True)
-def db(db_schema, monkeypatch):
-    db_schema.begin_nested()
-    monkeypatch.setattr(database, 'db', db_schema)
+@pytest.fixture
+def session(db, monkeypatch):
+    db.begin_nested()
+    monkeypatch.setattr(database, 'db', db)
 
-    yield db_schema
+    yield db
 
-    db_schema.rollback()
-    db_schema.close()
+    db.rollback()
+    db.close()
 ```
+
+@[4-6]
+@[10-14]
+@[20-23]
+@[25]
+@[27-28]
 
 Note:
 Here is an example of how global objects could be handled in tests. Monkey-patching.
@@ -455,20 +472,22 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 # conftest.py
+import pytest
 from flask import Flask
 import database
 
+@pytest.fixture
+def app():
+    return Flask("test")
 
 @pytest.fixture(scope="session")
-def db():
-    app = Flask(__name__)
+def db(app):
     database.db.init_app(app)
     database.db.create_all()    
     yield database.db
     database.db.drop_all()
 
-
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def session(db):
     db.session.begin_nested()
     yield db.session
@@ -476,8 +495,10 @@ def session(db):
     db.session.remove()
 ```
 
-@[1-5](Database)
-@[6-31])(New shiny fixtures)
+@[4](DB instance)
+@[11-13](App fixture)
+@[15-20]
+@[22-27]
 
 ##### `Flask-SQLAlchemy` 
 
@@ -523,21 +544,17 @@ def create_app(settings_object, **kwargs):
 # conftest.py
 from app import create_app
 
-
 @pytest.fixture(scope="session")
 def app():
     return create_app("app.settings.TestSettings")
 
-
-@pytest.fixture(scope="session")
-def db(app):
-    # Create extensions, tables, etc
-    yield database.db
-    # Drop tables, extensions, etc
+...
 ```
 
-@[1-12](Application factory)
-@[13-26])(New shiny fixtures)
+@[3-5]
+@[7-10]
+@[12]
+@[17-19]
 
 Note:
 However, application is still global, and it initializes on import. 
@@ -569,25 +586,30 @@ Note:
 #### New database for each testcase with `testing.postgresql`
 
 ```python
+# conftest.py
 import pytest
 import testing.postgresql
-
 
 @pytest.fixture
 def db_uri():
     with testing.postgresql.Postgresql() as db:
         yield db.url()
 
+@pytest.fixture
+def app(db_uri):
+    return create_app("app.settings.TestSettings", SQLALCHEMY_DATABASE_URI=db_uri)
 
 @pytest.fixture
-def db(db_uri):
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+def db(app):
     database.db.init_app(app)
     database.db.create_all()    
     yield database.db
     database.db.drop_all()
 ```
+
+@[4-7]
+@[9-11]
+@[13-18]
 
 ---
 ### Database
@@ -595,27 +617,16 @@ def db(db_uri):
 #### Truncate all data for each testcase
 
 ```python
-import pytest
-import testing.postgresql
-
+# conftest.py
+...
 
 @pytest.fixture(scope="session")
 def db_uri():
-    with testing.postgresql.Postgresql() as db:
-        yield db.url()
+    ...
 
+...
 
-@pytest.fixture(scope="session")
-def db(db_uri):
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-    database.db.init_app(app)
-    database.db.create_all()    
-    yield database.db
-    database.db.drop_all()
-
-
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def session(db):
     yield db.session
     for table in reversed(db.metadata.sorted_tables):
@@ -623,19 +634,33 @@ def session(db):
     db.session.commit()
 ```
 
+@[4-5]
+@[9-14]
+
 ---
 ### Database
 
 #### Wrap each testcase into transaction
 
 ```python
-@pytest.fixture(autouse=True)
+# conftest.py
+...
+
+@pytest.fixture(scope="session")
+def db_uri():
+    ...
+
+...
+@pytest.fixture
 def session(db):
     db.session.begin_nested()
     yield db.session
     db.session.rollback()
     db.session.remove()
 ```
+
+@[4-5]
+@[9-14]
 
 ---
 ### Database

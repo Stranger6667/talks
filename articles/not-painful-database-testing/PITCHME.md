@@ -5,7 +5,7 @@
 ---
 ### Who am I
 
-- @color[black](Тимлид в kiwi.com)
+- @color[black](Тимлид в KIWI.COM)
 - @color[black](Прага, Чехия)
 - @color[black](Python & open-source)
 
@@ -66,7 +66,7 @@ DB_URI = os.environ.get(
     "DB_URI", 
     "postgresql://127.0.0.1/postgres"
 )
-
+APP_NAME = "projectA"
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
 
@@ -253,10 +253,6 @@ It could lead to various issues if the second test module requires different con
 # database.py
 engine, session = create_db(settings.DB_URI)
 ```
-
-Note:
-Unfortunately the settings are accessed on the module level and we need to override it before the module is loaded.
-We could apply a similar approach to the DB session, but before that let's look how does it work.
 
 +++
 ### How session works

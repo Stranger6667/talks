@@ -49,12 +49,13 @@ If we are starting with a fresh new project, then why not do things right (again
 - Pytest
 
 ---
-### Code example
+### Example
+##### Project structure
 
 <img src="articles/not-painful-database-testing/assets/img/overview.png" width="600px"/>
 
 +++
-### Code example
+### Example
 ##### Settings
 
 ```python
@@ -74,7 +75,7 @@ We have a web application that works with database and we need to test it.
 We have a separate module with settings, that are evaluated during the first import.
 
 +++
-### Code example
+### Example
 
 ##### Database
 
@@ -107,7 +108,7 @@ Note:
 We have globally defined engine and session. The session is used in other parts of the code.
 
 +++
-### Code example
+### Example
 
 ##### Requests handlers
 
@@ -129,7 +130,7 @@ def get_booking(id):
 @[10-11]
 
 +++
-### Code example
+### Example
 
 ##### Application
 

@@ -48,10 +48,10 @@ If we are starting with a fresh new project, then why not do things right (again
 - PostgreSQL
 - Pytest
 
-+++
+---
 ### Code example
 
-<img src="articles/not-painful-database-testing/assets/img/png.jpg" width="600px"/>
+<img src="articles/not-painful-database-testing/assets/img/overview.png" width="600px"/>
 
 +++
 ### Code example

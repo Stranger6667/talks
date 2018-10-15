@@ -50,6 +50,11 @@ If we are starting with a fresh new project, then why not do things right (again
 
 +++
 ### Code example
+
+<img src="articles/not-painful-database-testing/assets/img/png.jpg" width="600px"/>
+
++++
+### Code example
 ##### Settings
 
 ```python

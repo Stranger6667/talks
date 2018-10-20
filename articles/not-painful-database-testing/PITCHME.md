@@ -1,4 +1,4 @@
-### @color[orange](Painless testing with SQLAlchemy and Flask)
+## Painless testing with SQLAlchemy and Flask
 
 ---
 ### Who am I

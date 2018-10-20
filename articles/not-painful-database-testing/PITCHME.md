@@ -1,6 +1,4 @@
-### @color[orange](Not painful testing with SQLAlchemy)
-
-#### Avoid shooting yourself in the foot
+### @color[orange](Painless testing with SQLAlchemy and Flask)
 
 ---
 ### Who am I
@@ -236,10 +234,10 @@ If any errors will occur during the execution, only requested module will be rem
 +++
 ### Key points
 
-- Module is an object
-- Module's code is executed and attributes are evaluated in a certain context
-- Modules are cached
-- The cache could be modified even if an error occurs
+- Модуль это объект
+- Код модуля выполняется в определенном контексте
+- Модули кэшируются
+- Кэш может быть модифицирован даже при ошибки во время импорта
 
 Note:
 If some module is required in two different tests, then it will be executed in a context of the first test and then 

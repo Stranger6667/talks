@@ -1,4 +1,9 @@
----?image=articles/good-and-bad-practices-for-writing-testable-code/assets/img/presentation-title.png
+---?image=articles/good-and-bad-practices-for-writing-testable-code/assets/img/background.png
+
+
+@snap[north-west]
+Хорошие и плохие практики
+@snapend
 
 ---
 ### Who am I

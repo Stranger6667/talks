@@ -3,9 +3,9 @@
 
 @snap[north-west]
 <br>
-<b style="font-size:55px; font-family: 'Trebuchet MS'">Хорошие и плохие практики для<br>написания тестируемого кода</b>
+<b style="font-size:52px; font-family: 'Trebuchet MS'">Хорошие и плохие практики для<br>написания тестируемого кода</b>
 <br><br>
-<p style="font-size:55px; font-family: 'Trebuchet MS'">Дмитрий Дыгало (kiwi.com)</p>
+<p style="font-size:52px; font-family: 'Trebuchet MS'">Дмитрий Дыгало (kiwi.com)</p>
 @snapend
 
 ---

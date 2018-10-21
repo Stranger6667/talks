@@ -7,13 +7,14 @@
 - @color[black](Прага, Чехия)
 - @color[black](Python & open-source)
 
+![Logo](articles/good-and-bad-practices-for-writing-testable-code/assets/img/logo.png)
+
 Note:
 Hello everyone, my name is Dmitry Dygalo and I am a technical team lead at kiwi.com. 
 I live in Prague and I like to build tools in Python. Also I like to contribute to open-source projects.
 Currently, I’m working on splitting a big legacy monolith into small and handy microservices. 
 This kind of activity often goes together with refactoring and fixing old problems. 
 
-![Logo](articles/good-and-bad-practices-for-writing-testable-code/assets/img/logo.png)
 ---
 ### Let's make things right (again)!
 

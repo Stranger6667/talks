@@ -1,7 +1,7 @@
 ---?image=articles/good-and-bad-practices-for-writing-testable-code/assets/img/background.png
 
 
-@snap[west-west]
+@snap[north-west]
 Хорошие и плохие практики для<br>написания тестируемого кода
 <br><br><br>
 @snapend

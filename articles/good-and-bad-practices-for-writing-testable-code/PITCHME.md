@@ -1,4 +1,4 @@
----?image=assets/img/presentation-title.png
+---?image=articles/good-and-bad-practices-for-writing-testable-code/assets/img/presentation-title.png
 
 ---
 ### Who am I

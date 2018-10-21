@@ -7,7 +7,7 @@
 - @color[black](Прага, Чехия)
 - @color[black](Python & open-source)
 
-![Logo](articles/good-and-bad-practices-for-writing-testable-code/assets/img/logo.png)
+<img src="articles/good-and-bad-practices-for-writing-testable-code/assets/img/logo.png" alt="Logo" width="270px" height="109px" style="position: fixed;bottom: 0;right: 0;"/>
 
 Note:
 Hello everyone, my name is Dmitry Dygalo and I am a technical team lead at kiwi.com. 

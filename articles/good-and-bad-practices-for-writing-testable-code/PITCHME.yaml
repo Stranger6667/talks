@@ -3,3 +3,5 @@ theme-override : articles/good-and-bad-practices-for-writing-testable-code/asset
 
 logo : articles/good-and-bad-practices-for-writing-testable-code/assets/img/logo.png
 logo-position : bottom-right
+
+transition : none

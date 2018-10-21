@@ -50,7 +50,7 @@ If we are starting with a fresh new project, then why not do things right (again
 ### Example
 ##### Project structure
 
-<img src="articles/not-painful-database-testing/assets/img/overview.png" width="600px"/>
+<img src="articles/painless-testing-with-sqlalchemy-and-flask/assets/img/overview.png" width="600px"/>
 
 +++
 ### Example

@@ -1,4 +1,4 @@
-## Painless testing with SQLAlchemy and Flask
+<img src="articles/good-and-bad-practices-for-writing-testable-code/assets/img/presentation-title.png"/>
 
 ---
 ### Who am I
@@ -50,7 +50,7 @@ If we are starting with a fresh new project, then why not do things right (again
 ### Example
 ##### Project structure
 
-<img src="articles/painless-testing-with-sqlalchemy-and-flask/assets/img/overview.png" width="600px"/>
+<img src="articles/good-and-bad-practices-for-writing-testable-code/assets/img/overview.png" width="600px"/>
 
 +++
 ### Example
@@ -349,7 +349,7 @@ of the already instantiated object, but if it has not been loaded yet, it loads 
 ---
 ### State after the first test
 
-- `settings` / `database` закешированы в `sys.modules`  
+- `settings` / `database` закэшированы в `sys.modules`  
 - Identity map содержит в себе экземпляр модели
 - Изменения внесены в базу
 

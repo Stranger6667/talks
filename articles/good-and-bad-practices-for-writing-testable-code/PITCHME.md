@@ -13,6 +13,7 @@ I live in Prague and I like to build tools in Python. Also I like to contribute 
 Currently, I’m working on splitting a big legacy monolith into small and handy microservices. 
 This kind of activity often goes together with refactoring and fixing old problems. 
 
+![Logo](articles/good-and-bad-practices-for-writing-testable-code/assets/img/logo.png)
 ---
 ### Let's make things right (again)!
 

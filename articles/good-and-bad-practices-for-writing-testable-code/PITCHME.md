@@ -556,7 +556,7 @@ After some time your tests will finish, but Facebook on your tab will not.
 
 <img src="articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/fix-problem.jpg" alt="Fix problem" width="600px"/>
 
-### There is a better way
+#### There is a better way
 
 @snap[south]
 <b style="font-size:20px;">17</b>

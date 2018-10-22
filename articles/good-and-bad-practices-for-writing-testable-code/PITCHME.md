@@ -30,6 +30,10 @@ This kind of activity often goes together with refactoring and fixing old proble
 
 <img src="articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/lets-make-right.jpg" alt="Make right" width="600px"/>
 
+@snap[south]
+<b>2</b>
+@snapend
+
 Note:
 If we are starting with a fresh new project, then why not do things right (again?) at the beginning?
 
@@ -42,12 +46,20 @@ If we are starting with a fresh new project, then why not do things right (again
 - Следующие шаги
 - Результаты
 
+@snap[south]
+<b>3</b>
+@snapend
+
 ---
 ### Aspects and goals
 
 - @color[black](Изоляция и независимость)
 - @color[black](Воспроизводимость)
 - @color[black](Скорость)
+
+@snap[south]
+<b>4</b>
+@snapend
 
 ---
 ### Stack
@@ -58,11 +70,19 @@ If we are starting with a fresh new project, then why not do things right (again
 - PostgreSQL
 - Pytest
 
+@snap[south]
+<b>5</b>
+@snapend
+
 ---
 ### Example
 ##### Project structure
 
 <img src="articles/good-and-bad-practices-for-writing-testable-code/assets/img/overview.png" width="600px"/>
+
+@snap[south]
+<b>6.1</b>
+@snapend
 
 +++
 ### Example
@@ -79,6 +99,10 @@ DB_URI = os.environ.get(
 APP_NAME = "projectA"
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
+
+@snap[south]
+<b>6.2</b>
+@snapend
 
 Note:
 We have a web application that works with database and we need to test it.
@@ -114,6 +138,10 @@ engine, session = create_db(settings.DB_URI)
 @[10-16]
 @[18]
 
+@snap[south]
+<b>6.3</b>
+@snapend
+
 Note:
 We have globally defined engine and session. The session is used in other parts of the code.
 
@@ -139,6 +167,10 @@ def get_booking(id):
 @[5-8]
 @[10-11]
 
+@snap[south]
+<b>6.4</b>
+@snapend
+
 +++
 ### Example
 
@@ -156,6 +188,10 @@ connexion_app.add_api(
     resolver=RestyResolver("path.to.handlers"),
 )
 ```
+
+@snap[south]
+<b>6.5</b>
+@snapend
 
 Note:
 What do you think, is it a real code?
@@ -178,9 +214,16 @@ def test_get_booking():
 @[3-6]
 @[8-9]
 
+@snap[south]
+<b>7</b>
+@snapend
+
 ---
 ## Problems & alternatives
 
+@snap[south]
+<b>8</b>
+@snapend
 ---
 ### Global settings
 
@@ -195,6 +238,10 @@ DB_URI = os.environ.get(
 
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
+
+@snap[south]
+<b>9</b>
+@snapend
 
 Note:
 To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
@@ -234,6 +281,10 @@ return sys.modules[spec.name]
 @[15-17]
 @[19-20]
 
+@snap[south]
+<b>10.1</b>
+@snapend
+
 Note:
 Python's import machinery will check for already imported module in cache first.
 If the module has parent modules, they will be loaded first, then the cache will be checked again.
@@ -251,6 +302,10 @@ If any errors will occur during the execution, only requested module will be rem
 - Модули кэшируются
 - Кэш может быть модифицирован даже при ошибки во время импорта
 
+@snap[south]
+<b>10.2</b>
+@snapend
+
 Note:
 If some module is required in two different tests, then it will be executed in a context of the first test and then 
 it will be taken from cache in the second test, unless it is not reloaded.
@@ -263,6 +318,10 @@ It could lead to various issues if the second test module requires different con
 # database.py
 engine, session = create_db(settings.DB_URI)
 ```
+
+@snap[south]
+<b>11.1</b>
+@snapend
 
 +++
 ### How session works
@@ -298,6 +357,10 @@ for meth in Session.public_methods:
 @[15-20]
 @[21-22]
 
+@snap[south]
+<b>11.2</b>
+@snapend
+
 Note:
 Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
 initializes the factory lazily as well. 
@@ -324,6 +387,10 @@ class ThreadLocalRegistry(ScopedRegistry):
 
 @[5]
 @[8-12]
+
+@snap[south]
+<b>11.3</b>
+@snapend
 
 Note:
 The registry is thread-local - values will be different for separate threads.
@@ -353,6 +420,10 @@ class Session:
 @[1-7]
 @[10-13]
 
+@snap[south]
+<b>11.4</b>
+@snapend
+
 Note:
 An identity map is basically a cache between your application code and the database. 
 If the requested data has already been loaded from the database, the identity map returns the same instance 
@@ -364,6 +435,10 @@ of the already instantiated object, but if it has not been loaded yet, it loads 
 - `settings` / `database` закэшированы в `sys.modules`  
 - Identity map содержит в себе экземпляр модели
 - Изменения внесены в базу
+
+@snap[south]
+<b>12</b>
+@snapend
 
 Note:
 The new booking, created during the first test is saved in the identity map and as well it is committed to the DB.
@@ -380,6 +455,10 @@ But if you want to implement global entities by yourself you should at least be 
 - Потокобезопасность
 - Слабые ссылки
 
+@snap[south]
+<b>13</b>
+@snapend
+
 Note:
 All your modules are executed and cached. The context of execution could be not exactly what you need.
 Laziness plays well, it postpones evaluation until the very last moment and at least you have more control over it.
@@ -389,6 +468,10 @@ Objects will not be kept only because it is cached somewhere.
 
 ---
 ### How to handle all of this?
+
+@snap[south]
+<b>14</b>
+@snapend
 
 Note:
 Let's go from ad-hoc solutions to something better.
@@ -437,6 +520,10 @@ def session(db, monkeypatch):
 @[27]
 @[29-30]
 
+@snap[south]
+<b>15</b>
+@snapend
+
 Note:
 Here is an example of how global objects could be handled in tests. Monkey-patching.
 
@@ -450,6 +537,10 @@ Here is an example of how global objects could be handled in tests. Monkey-patch
 - @color[black](Тесты легче сломать)
 - @color[black](Скорость выполнения тестов может пострадать)
 @ulend
+
+@snap[south]
+<b>16</b>
+@snapend
 
 Note:
 Whats wrong with that? Complexity grows dramatically fast
@@ -467,6 +558,10 @@ After some time your tests will finish, but Facebook on your tab will not.
 
 ### There is a better way
 
+@snap[south]
+<b>17</b>
+@snapend
+
 Note:
 In large projects, it could lead to monkey patching a significant amount of different modules.
 The global state in the previous examples is hardly predictable. Let’s change it and make it manageable.
@@ -477,6 +572,10 @@ We want to initialise it only when we need it; just in the desired context.
 @transition[none]
 @snap[north]
 <h3>Deferred initialization</h3>
+@snapend
+
+@snap[south]
+<b>18.1</b>
 @snapend
 
 Note:
@@ -525,7 +624,15 @@ def session(db):
 @[15-20]
 @[22-27]
 
+@snap[south]
+<b>18.2</b>
+@snapend
+
 ##### `Flask-SQLAlchemy` 
+
+@snap[south]
+<b>19.1</b>
+@snapend
 
 Note:
 This is how it could be changed with `Flask-SQLAlchemy` extension.
@@ -541,6 +648,10 @@ Now the database is initialised only when the application initialises — we
 - @color[black](Управляемая инициализация базы)
 - @color[black](Нет monkey-patching'а)
 @ulend
+
+@snap[south]
+<b>19.2</b>
+@snapend
 
 Note:
 As a consequence, we don’t have to initialise another database connection in tests and make monkey patches.
@@ -581,6 +692,10 @@ def app():
 @[12]
 @[17-19]
 
+@snap[south]
+<b>20.1</b>
+@snapend
+
 Note:
 However, application is still global, and it initializes on import. 
 If we didn’t initialise the DB before running the tests, it wouldn’t work. 
@@ -598,12 +713,20 @@ The basic idea is to isolate the application instance creation in a separate fun
 - @color[black](Гибкость. Широкие возможности параметризации)
 @ulend
 
+@snap[south]
+<b>20.2</b>
+@snapend
+
 Note:
 - Isolate the side-effects of creating an application on the module-level. 
 - Flexibility — multiple apps and/ore different settings. It’s available as a fixture, which provides more flexibility (e.g., parametrization)
 
 ---
 ## Next steps
+
+@snap[south]
+<b>21</b>
+@snapend
 
 ---
 ### Database
@@ -639,6 +762,10 @@ def db(app):
 @[10-15]
 @[17-22]
 
+@snap[south]
+<b>22</b>
+@snapend
+
 ---
 ### Database
 
@@ -665,6 +792,10 @@ def session(db):
 @[4-5]
 @[10-15]
 
+@snap[south]
+<b>23</b>
+@snapend
+
 ---
 ### Database
 
@@ -682,12 +813,20 @@ def session(db):
     db.session.remove()
 ```
 
+@snap[south]
+<b>24</b>
+@snapend
+
 ---
 ### Database
 
 #### Consider using `pytest-pgsql`
 
 https://github.com/CloverHealth/pytest-pgsql
+
+@snap[south]
+<b>25</b>
+@snapend
 
 ---
 ### Speed up the test suite
@@ -697,6 +836,10 @@ https://github.com/CloverHealth/pytest-pgsql
 - Шаблоны базы / переиспользование существующей
 - Разделение и параллельное выполнение
 
+@snap[south]
+<b>26</b>
+@snapend
+
 ---
 ## Results
 
@@ -704,8 +847,16 @@ https://github.com/CloverHealth/pytest-pgsql
 - Меньше неиспользованного кода
 - Выше скорость выполнения тестов
 
+@snap[south]
+<b>27</b>
+@snapend
+
 ---
 ## Thank you
 
 - https://github.com/Stranger6667
 - https://twitter.com/Stranger6667
+
+@snap[south]
+<b>28</b>
+@snapend

@@ -15,6 +15,10 @@
 - @color[black](Прага, Чехия)
 - @color[black](Python & open-source)
 
+@snap[south]
+<b>1</b>
+@snapend
+
 Note:
 Hello everyone, my name is Dmitry Dygalo and I am a technical team lead at kiwi.com. 
 I live in Prague and I like to build tools in Python. Also I like to contribute to open-source projects.

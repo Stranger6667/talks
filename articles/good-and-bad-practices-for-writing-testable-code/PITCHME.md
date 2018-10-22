@@ -16,7 +16,7 @@
 - @color[black](Python & open-source)
 
 @snap[south]
-<b>1</b>
+<b style="font-size:20px;">1</b>
 @snapend
 
 Note:
@@ -31,7 +31,7 @@ This kind of activity often goes together with refactoring and fixing old proble
 <img src="articles/testable-code-making-the-testing-world-better/v1/presentation/assets/img/lets-make-right.jpg" alt="Make right" width="600px"/>
 
 @snap[south]
-<b>2</b>
+<b style="font-size:20px;">2</b>
 @snapend
 
 Note:
@@ -47,7 +47,7 @@ If we are starting with a fresh new project, then why not do things right (again
 - Результаты
 
 @snap[south]
-<b>3</b>
+<b style="font-size:20px;">3</b>
 @snapend
 
 ---
@@ -58,7 +58,7 @@ If we are starting with a fresh new project, then why not do things right (again
 - @color[black](Скорость)
 
 @snap[south]
-<b>4</b>
+<b style="font-size:20px;">4</b>
 @snapend
 
 ---
@@ -71,7 +71,7 @@ If we are starting with a fresh new project, then why not do things right (again
 - Pytest
 
 @snap[south]
-<b>5</b>
+<b style="font-size:20px;">5</b>
 @snapend
 
 ---
@@ -215,14 +215,14 @@ def test_get_booking():
 @[8-9]
 
 @snap[south]
-<b>7</b>
+<b style="font-size:20px;">7</b>
 @snapend
 
 ---
 ## Problems & alternatives
 
 @snap[south]
-<b>8</b>
+<b style="font-size:20px;">8</b>
 @snapend
 ---
 ### Global settings
@@ -240,7 +240,7 @@ SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
 
 @snap[south]
-<b>9</b>
+<b style="font-size:20px;">9</b>
 @snapend
 
 Note:
@@ -437,7 +437,7 @@ of the already instantiated object, but if it has not been loaded yet, it loads 
 - Изменения внесены в базу
 
 @snap[south]
-<b>12</b>
+<b style="font-size:20px;">12</b>
 @snapend
 
 Note:
@@ -456,7 +456,7 @@ But if you want to implement global entities by yourself you should at least be 
 - Слабые ссылки
 
 @snap[south]
-<b>13</b>
+<b style="font-size:20px;">13</b>
 @snapend
 
 Note:
@@ -470,7 +470,7 @@ Objects will not be kept only because it is cached somewhere.
 ### How to handle all of this?
 
 @snap[south]
-<b>14</b>
+<b style="font-size:20px;">14</b>
 @snapend
 
 Note:
@@ -521,7 +521,7 @@ def session(db, monkeypatch):
 @[29-30]
 
 @snap[south]
-<b>15</b>
+<b style="font-size:20px;">15</b>
 @snapend
 
 Note:
@@ -539,7 +539,7 @@ Here is an example of how global objects could be handled in tests. Monkey-patch
 @ulend
 
 @snap[south]
-<b>16</b>
+<b style="font-size:20px;">16</b>
 @snapend
 
 Note:
@@ -559,7 +559,7 @@ After some time your tests will finish, but Facebook on your tab will not.
 ### There is a better way
 
 @snap[south]
-<b>17</b>
+<b style="font-size:20px;">17</b>
 @snapend
 
 Note:
@@ -721,13 +721,13 @@ Note:
 ## Next steps
 
 @snap[south]
-<b>20</b>
+<b style="font-size:20px;">20</b>
 @snapend
 
 ---
 ### Database
 
-#### New database for each testcase with `testing.postgresql`
+#### New database for each testcase
 
 ```python
 # conftest.py
@@ -759,7 +759,7 @@ def db(app):
 @[17-22]
 
 @snap[south]
-<b>21</b>
+<b style="font-size:20px;">21</b>
 @snapend
 
 ---
@@ -789,7 +789,7 @@ def session(db):
 @[10-15]
 
 @snap[south]
-<b>22</b>
+<b style="font-size:20px;">22</b>
 @snapend
 
 ---
@@ -810,7 +810,7 @@ def session(db):
 ```
 
 @snap[south]
-<b>23</b>
+<b style="font-size:20px;">23</b>
 @snapend
 
 ---
@@ -821,7 +821,7 @@ def session(db):
 https://github.com/CloverHealth/pytest-pgsql
 
 @snap[south]
-<b>24</b>
+<b style="font-size:20px;">24</b>
 @snapend
 
 ---
@@ -833,7 +833,7 @@ https://github.com/CloverHealth/pytest-pgsql
 - Разделение и параллельное выполнение
 
 @snap[south]
-<b>25</b>
+<b style="font-size:20px;">25</b>
 @snapend
 
 ---
@@ -844,7 +844,7 @@ https://github.com/CloverHealth/pytest-pgsql
 - Выше скорость выполнения тестов
 
 @snap[south]
-<b>26</b>
+<b style="font-size:20px;">26</b>
 @snapend
 
 ---
@@ -854,5 +854,5 @@ https://github.com/CloverHealth/pytest-pgsql
 - https://twitter.com/Stranger6667
 
 @snap[south]
-<b>27</b>
+<b style="font-size:20px;">27</b>
 @snapend

@@ -646,7 +646,7 @@ Now the database is initialised only when the application initialises — we
 @ulend
 
 @snap[south]
-<b>19.2</b>
+<b>18.3</b>
 @snapend
 
 Note:
@@ -689,7 +689,7 @@ def app():
 @[17-19]
 
 @snap[south]
-<b>20.1</b>
+<b>19.1</b>
 @snapend
 
 Note:
@@ -710,7 +710,7 @@ The basic idea is to isolate the application instance creation in a separate fun
 @ulend
 
 @snap[south]
-<b>20.2</b>
+<b>19.2</b>
 @snapend
 
 Note:
@@ -721,7 +721,7 @@ Note:
 ## Next steps
 
 @snap[south]
-<b>21</b>
+<b>20</b>
 @snapend
 
 ---
@@ -759,7 +759,7 @@ def db(app):
 @[17-22]
 
 @snap[south]
-<b>22</b>
+<b>21</b>
 @snapend
 
 ---
@@ -789,7 +789,7 @@ def session(db):
 @[10-15]
 
 @snap[south]
-<b>23</b>
+<b>22</b>
 @snapend
 
 ---
@@ -810,7 +810,7 @@ def session(db):
 ```
 
 @snap[south]
-<b>24</b>
+<b>23</b>
 @snapend
 
 ---
@@ -821,7 +821,7 @@ def session(db):
 https://github.com/CloverHealth/pytest-pgsql
 
 @snap[south]
-<b>25</b>
+<b>24</b>
 @snapend
 
 ---
@@ -833,7 +833,7 @@ https://github.com/CloverHealth/pytest-pgsql
 - Разделение и параллельное выполнение
 
 @snap[south]
-<b>26</b>
+<b>25</b>
 @snapend
 
 ---
@@ -844,7 +844,7 @@ https://github.com/CloverHealth/pytest-pgsql
 - Выше скорость выполнения тестов
 
 @snap[south]
-<b>27</b>
+<b>26</b>
 @snapend
 
 ---
@@ -854,5 +854,5 @@ https://github.com/CloverHealth/pytest-pgsql
 - https://twitter.com/Stranger6667
 
 @snap[south]
-<b>28</b>
+<b>27</b>
 @snapend

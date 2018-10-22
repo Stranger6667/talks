@@ -624,14 +624,10 @@ def session(db):
 @[15-20]
 @[22-27]
 
-@snap[south]
-<b>18.2</b>
-@snapend
-
 ##### `Flask-SQLAlchemy` 
 
 @snap[south]
-<b>19.1</b>
+<b>18.2</b>
 @snapend
 
 Note:

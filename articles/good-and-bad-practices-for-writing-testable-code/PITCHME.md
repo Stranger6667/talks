@@ -81,7 +81,7 @@ If we are starting with a fresh new project, then why not do things right (again
 <img src="articles/good-and-bad-practices-for-writing-testable-code/assets/img/overview.png" width="600px"/>
 
 @snap[south]
-<b>6.1</b>
+<b style="font-size:20px;">6.1</b>
 @snapend
 
 +++
@@ -101,7 +101,7 @@ SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
 
 @snap[south]
-<b>6.2</b>
+<b style="font-size:20px;">6.2</b>
 @snapend
 
 Note:
@@ -139,7 +139,7 @@ engine, session = create_db(settings.DB_URI)
 @[18]
 
 @snap[south]
-<b>6.3</b>
+<b style="font-size:20px;">6.3</b>
 @snapend
 
 Note:
@@ -168,7 +168,7 @@ def get_booking(id):
 @[10-11]
 
 @snap[south]
-<b>6.4</b>
+<b style="font-size:20px;">6.4</b>
 @snapend
 
 +++
@@ -190,7 +190,7 @@ connexion_app.add_api(
 ```
 
 @snap[south]
-<b>6.5</b>
+<b style="font-size:20px;">6.5</b>
 @snapend
 
 Note:
@@ -282,7 +282,7 @@ return sys.modules[spec.name]
 @[19-20]
 
 @snap[south]
-<b>10.1</b>
+<b style="font-size:20px;">10.1</b>
 @snapend
 
 Note:
@@ -303,7 +303,7 @@ If any errors will occur during the execution, only requested module will be rem
 - Кэш может быть модифицирован даже при ошибки во время импорта
 
 @snap[south]
-<b>10.2</b>
+<b style="font-size:20px;">10.2</b>
 @snapend
 
 Note:
@@ -320,7 +320,7 @@ engine, session = create_db(settings.DB_URI)
 ```
 
 @snap[south]
-<b>11.1</b>
+<b style="font-size:20px;">11.1</b>
 @snapend
 
 +++
@@ -358,7 +358,7 @@ for meth in Session.public_methods:
 @[21-22]
 
 @snap[south]
-<b>11.2</b>
+<b style="font-size:20px;">11.2</b>
 @snapend
 
 Note:
@@ -389,7 +389,7 @@ class ThreadLocalRegistry(ScopedRegistry):
 @[8-12]
 
 @snap[south]
-<b>11.3</b>
+<b style="font-size:20px;">11.3</b>
 @snapend
 
 Note:
@@ -421,7 +421,7 @@ class Session:
 @[10-13]
 
 @snap[south]
-<b>11.4</b>
+<b style="font-size:20px;">11.4</b>
 @snapend
 
 Note:
@@ -575,7 +575,7 @@ We want to initialise it only when we need it; just in the desired context.
 @snapend
 
 @snap[south]
-<b>18.1</b>
+<b style="font-size:20px;">18.1</b>
 @snapend
 
 Note:
@@ -627,7 +627,7 @@ def session(db):
 ##### `Flask-SQLAlchemy` 
 
 @snap[south]
-<b>18.2</b>
+<b style="font-size:20px;">18.2</b>
 @snapend
 
 Note:
@@ -646,7 +646,7 @@ Now the database is initialised only when the application initialises — we
 @ulend
 
 @snap[south]
-<b>18.3</b>
+<b style="font-size:20px;">18.3</b>
 @snapend
 
 Note:
@@ -689,7 +689,7 @@ def app():
 @[17-19]
 
 @snap[south]
-<b>19.1</b>
+<b style="font-size:20px;">19.1</b>
 @snapend
 
 Note:
@@ -710,7 +710,7 @@ The basic idea is to isolate the application instance creation in a separate fun
 @ulend
 
 @snap[south]
-<b>19.2</b>
+<b style="font-size:20px;">19.2</b>
 @snapend
 
 Note:

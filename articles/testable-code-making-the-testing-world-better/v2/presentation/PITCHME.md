@@ -1122,7 +1122,7 @@ There is another technique that was used in the previous examples but wasn’t m
 <h4>Dependency injection</h3>
 @snapend
 
-##### Redis-py connection pool + tests
+##### Redis-py connection pool
 
 ```python
 class StrictRedis(object):
@@ -1134,7 +1134,8 @@ class StrictRedis(object):
         self.connection_pool = connection_pool
 ```
 
-@[3-7]
+@[4-6]
+@[7]
 
 @snap[south]
 <b style="font-size:20px;">29.2</b>
@@ -1146,7 +1147,6 @@ class StrictRedis(object):
 <h4>Dependency injection</h3>
 @snapend
 
-##### Redis-py connection pool
 ##### Tests
 
 ```python
@@ -1159,15 +1159,12 @@ class DummyConnection(object):
 
 class TestConnectionPool(object):
     def get_pool(self, 
-            connection_kwargs=None, 
-            max_connections=None,
-            connection_class=DummyConnection
+            connection_class=DummyConnection,
+            ...
         ):
-        connection_kwargs = connection_kwargs or {}
         return redis.ConnectionPool(
             connection_class=connection_class,
-            max_connections=max_connections,
-            **connection_kwargs
+            ...
         )
 
     def test_connection_creation(self):
@@ -1179,8 +1176,8 @@ class TestConnectionPool(object):
 ```
 
 @[1-6]
-@[8-19]
-@[21-26]
+@[8-16]
+@[18-23]
 
 @snap[south]
 <b style="font-size:20px;">29.3</b>
@@ -1271,7 +1268,9 @@ class MockedBookingFactory(BookingFactory, MockSessionFactory):
 
 Consider as an alternative
 
-Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
+"super considered super!" by Raymond Hettinger. PyCon 2015
+
+https://www.youtube.com/watch?v=EiOglTERPEo
 
 @snap[south]
 <b style="font-size:20px;">31.3</b>

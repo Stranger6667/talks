@@ -1,6 +1,6 @@
 ### @color[orange](Testable code)
 
-#### Making the testing world better
+#### making the (testing) world better 
 
 ---
 ### Who am I
@@ -23,17 +23,25 @@ This kind of activity often goes together with refactoring and fixing old proble
 Note:
 If we are starting with a fresh new project, then why not do things right (again?) at the beginning?
 
----
-### Important aspects of testing
+--- 
+### Overview
 
-@ul
-- @color[black](Isolation)
-- @color[black](Independence)
+- Testing aspects and goals
+- Previous state
+- Problems & alternatives
+- Next steps 
+- Results
+
+---
+## Testing aspects and goals
+
+- @color[black](Isolation & Independence)
 - @color[black](Repeatability)
 - @color[black](Speed)
-@ulend
 
-Note: 
+Note:
+There a couple of aspects, that are crucial for building any test suite
+
 - Tests should not interfere with each other
 - You should be able to run any subset of your tests in any order
 - You should be able to easily reproduce any test failure
@@ -43,14 +51,65 @@ These principles apply to different testing levels.
 For unittests when you’re testing small, independent units of your code and as well for integration tests.
 
 ---
-### Testing code that involves databases
+### Scale
+
+- 400+ developers 
+- 250+ active repositories
+- Many thousands of tests
+
+Note:
+Ideas:
+Company is big, many developers, speed of getting a feedback is important, multiply delay by number of devs working on a project
+
+---
+### Human factor
+
+Mindset > Testability > Tests
+
+Note:
+Ideas
+The most important thing is the mindset you have when developing something. 
+Then it naturally comes to testable code.
+Then tests will come naturally.
+
+---
+## Previous state
+
+Note:
+I'll provide you with an example of how some parts of our codebase looked like a couple of months before and tell you
+some details how it was working and what is wrong with this.
+
+---
+### Stack
+
+- Python 2.7 / 3.6 / 3.7
+- Flask + connexion
+- SQLAlchemy
+- PostgreSQL
+- Pytest
+
++++
+### Code example
+##### Settings
 
 ```python
 # settings.py
 import os
 
 DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
+```
 
+Note:
+We have a web application that works with database and we need to test it.
+We have a separate module with settings, that are evaluated during the first import.
+
++++
+### Code example
+
+##### Database
+
+```python
 # database.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -58,16 +117,27 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from . import settings
 
 
-def _create_db(uri):
+def create_db(uri):
+    connect_args = {"application_name": settings.APP_NAME}
+    if settings.SSL_CERTIFICATE_PATH:
+        connect_args["sslrootcert"] = settings.SSL_CERTIFICATE_PATH
     engine = create_engine(uri)
     session = sessionmaker(bind=engine)
     session = scoped_session(session)
     return engine, session
 
+engine, session = create_db(settings.DB_URI)
+```
 
-engine, session = _create_db(settings.DB_URI)
+Note:
+We have globally defined engine and session. The session is used in other parts of the code.
 
++++
+### Code example
 
+##### Requests handlers
+
+```python
 # handlers.py
 from .database import session
 from .models import Booking
@@ -82,33 +152,44 @@ def create_booking(data):
 def get_booking(id):
     return session.query(Booking).get(id)
 ```
++++
+### Code example
 
-Note:
-We have a web application that works with database and we need to test it. We need different tests - unit and integration tests as well.
-We have a separate module with settings, that are evaluated during the first import.
-We have globally defined engine and session. The session is used in other parts of the code.
-What do you think, is it a real code?
-Ok, lets look at a couple of tests for the handlers above.
-
----
-### Tests example
+##### Application
 
 ```python
-from .handlers import create_booking, get_booking
+# app.py
+from connexion.apps.flask_app import FlaskApp
+from connexion.resolver import RestyResolver
 
 
-def test_create_booking():
-    email = "test@test.com"
-    booking = create_booking(email=email)
-    assert booking.email == email
-
-
-def test_get_booking():
-    assert get_booking(1) is None
+connexion_app = FlaskApp(__package__)
+connexion_app.add_api(
+    "path/to/schema.yml",
+    validate_responses=True,
+    strict_validation=True,
+    resolver=RestyResolver("path.to.handlers"),
+)
 ```
 
 Note:
-We need these tests to be isolated and independent. Are they independent and isolated?
+What do you think, is it a real code?
+
+---
+## Problems & alternatives
+
+---
+### Global settings
+
+```python
+# settings.py
+import os
+
+DB_URI = os.environ.get("DB_URI", "postgresql://postgres:postgres@127.0.0.1:5432/postgres")
+SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
+```
+
+Note:
 To understand what problems could happen to your test suite and your application when you use global variables we need to look at 
 what happens when you use a module with a global variable in its namespace. 
 To understand this lets' look how the Python import system works. 
@@ -120,13 +201,6 @@ To understand this lets' look how the Python import system works.
 # Check the cache
 if name in sys.modules:
     return sys.modules[name]
-
-# Load parent modules if exist
-if has_parents(name):
-    load_parents()
-    # Check the cache again
-    if name in sys.modules:
-        return sys.modules[name]
 
 # Find a module spec
 spec = find_spec(name)
@@ -152,7 +226,7 @@ Then will find a module specification - encapsulation of the module's
 import-related information (absolute name of the module, loader, parent package, etc).
 Then module object will be created and initialized with certain attributes from the spec.
 Then the module is cached, executed and returned. 
-If any errors will occur during the execution, only requested module will be removed from the cache. 
+If any errors will occur during the execution, only requested module will be removed from the cache.
 
 +++
 ### Key points
@@ -175,6 +249,112 @@ It could lead to various issues if the second test module requires different con
 - PEP: https://www.python.org/dev/peps/pep-0451/
 
 ---
+### Unit tests examples
+
+```python
+import settings
+from .database import create_db
+
+
+def test_create_db_with_cert(monkeypatch):
+    monkeypatch.setattr(settings, "SSL_CERTIFICATE_PATH", "/path/to/cert.pem")
+    engine, session = create_db("some uri")
+    # assert the output
+```
+
+---
+### Explicit parameters
+
+```python
+from .database import create_db
+
+ 
+def test_create_db_with_cert():
+    engine, session = create_db("some uri", ssl_cert_path="/path/to/cert.pem")
+    # assert the output
+```
+
+---
+### Lazy settings. Django example
+
+```
+# django/conf/__init__.py
+
+class LazySettings(LazyObject):
+    def _setup(self, name=None):
+        """Load from env var. Called on first access if not configured already."""
+        settings_module = ...
+        self._wrapped = Settings(settings_module)
+        
+    def configure(self, default_settings=global_settings, **options):
+        """Manual configuration."""
+        if self._wrapped is not empty:
+            raise RuntimeError('Settings already configured.')
+        holder = UserSettingsHolder(default_settings)
+        for name, value in options.items():
+            setattr(holder, name, value)
+        self._wrapped = holder
+
+settings = LazySettings()
+```
+
+Note:
+In the case if you need to use some global settings it is much better to keep them lazy like it is done in Django for example.
+
++++
+### Lazy settings. Django example
+
+```
+# django/test/utils.py
+
+class override_settings(TestContextDecorator):
+
+    def __init__(self, **kwargs):
+        self.options = kwargs
+
+    def enable(self):
+        ...
+
+    def disable(self):
+        ...
+```
+
+Note:
+With lazy approach we can override a global settings object without even loading the actual settings.
+
++++
+### Lazy settings. Django example
+
+```python
+# database.py
+from .conf import settings
+
+...
+
+# test_db.py
+from .utils import override_settings
+
+
+@override_settings(SSL_CERTIFICATE_PATH="/path/to/cert.pem")
+def test_create_db_with_cert():
+    from .database import create_db
+    engine, session = create_db("some uri", ssl_cert_path="/path/to/cert.pem")
+    # assert the output
+
+```
+---
+### Global DB session
+
+```python
+# database.py
+engine, session = create_db(settings.DB_URI)
+```
+
+Note:
+Unfortunately the settings are accessed on the module level and we need to override it before the module is loaded.
+We could apply a similar approach to the DB session, but before that let's look how does it work.
+
++++
 ### How session works
 
 ##### It is lazy
@@ -202,7 +382,6 @@ for meth in Session.public_methods:
 ```
 
 Note:
-To understand what is going on during these tests, lets look at how the SQLAlchemy session works.
 Scoped session is lazy. It takes a factory and it doesn't call it immediately, but proxies all calls to the registry, which
 initializes the factory lazily as well. 
 
@@ -229,8 +408,8 @@ class ThreadLocalRegistry(ScopedRegistry):
 Note:
 The registry is thread-local - values will be different for separate threads.
 
----
-### How session works with a database
++++
+### How session works
 
 #### It uses an identity map
 
@@ -257,19 +436,21 @@ If the requested data has already been loaded from the database, the identity ma
 of the already instantiated object, but if it has not been loaded yet, it loads it and stores the new object in the map.
 
 ---
-### State before the first test
+### Handlers tests
 
-- Session is defined but not evaluated
-- DB_URI is evaluated
-- `psycopg2` is loaded as a side-effect of `create_engine`
-- modules are cached
+```python
+from .handlers import create_booking, get_booking
 
-Note:
-Even before the first test some thing already evaluated and cached.
-Nothing critical, but these state changes could interfere with your tests. 
-If you want to use another DB URL you'll need to either replace an attribute in the module or reload the module.
-Some modules could be heavy to load. It could unnecessary slow down the testing process. 
-The same goes for any heavy computations on the module level.
+
+def test_create_booking():
+    email = "test@test.com"
+    booking = create_booking(email=email)
+    assert booking.email == email
+
+
+def test_get_booking():
+    assert get_booking(1) is None
+```
 
 ---
 ### State after the first test
@@ -286,8 +467,6 @@ But if you want to implement global entities by yourself you should at least be 
 ---
 ### Globals check list
 
-#### What to think about when implementing something on the module level.
-
 - Module caching
 - Different contexts
 - Laziness
@@ -300,12 +479,12 @@ Laziness plays well, it postpones evaluation until the very last moment and at l
 Your global variable could be accessed by different threads - use locks and thread-local storage for that
 If you want to cache something - consider having weak references. 
 Objects will not be kept only because it is cached somewhere.
- 
+
 ---
 ### How to handle all of this?
 
 Note:
-Let's go from ad-hoc solutions to something better. 
+Let's go from ad-hoc solutions to something better.
 
 ---
 ### Monkey-patching
@@ -374,7 +553,7 @@ Note:
 In large projects, it could lead to monkey patching a significant amount of different modules.
 
 ---
-### Let's make it better
+### There is a better way
 
 Note:
 The global state in the previous examples is hardly predictable. Let’s change it and make it manageable.
@@ -397,8 +576,6 @@ Also, it used to register some teardown logic for this global object.
 @snap[north]
 <h3>Deferred initialization</h3>
 @snapend
-
-##### `Flask-SQLAlchemy` 
 
 ```python
 # database.py
@@ -428,41 +605,14 @@ def session(db):
     db.session.remove()
 ```
 
-@[1-13](Database & Application)
-@[15-31])(New shiny fixtures)
+@[1-5](Database)
+@[6-31])(New shiny fixtures)
+
+##### `Flask-SQLAlchemy` 
 
 Note:
 This is how it could be changed with `Flask-SQLAlchemy` extension.
 Now the database is initialised only when the application initialises — we put the DB into application context.
-
-+++
-@transition[none]
-@snap[north]
-<h4>How does it work?</h4>
-@snapend
-
-##### Via registration of teardown function
-
-```python
-class SQLAlchemy(object):
-    ...
-
-    def init_app(self, app):
-        ...
-
-        @app.teardown_appcontext
-        def shutdown_session(response_or_exc):
-            if app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN']:
-                if response_or_exc is None:
-                    self.session.commit()
-
-            self.session.remove()
-            return response_or_exc
-```
-
-Note:
-It registers a teardown function for the application. And as a consequence we need to put our tests into the application context.
-It could be acceptable for certain cases, especially in web development.
 
 +++
 @transition[none]
@@ -540,250 +690,51 @@ Note:
 - Flexibility — multiple apps and/ore different settings. It’s available as a fixture, which provides more flexibility (e.g., parametrization)
 
 ---
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
-
-```python
-def create_booking(session, data):
-    booking = Booking(**data)
-    session.add(booking)
-    session.commit()
-```
-
-Note:
-There is another technique that was used in the previous examples but wasn’t mentioned explicitly. Dependency injection.
-
-+++
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
-
-### Flask example + Flask-SQLAlchemy
-
-+++
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
-
-### Redis-py connection pool + tests
-
-```python
-class StrictRedis(object):
-
-    def __init__(self, connection_pool=None, **kwargs):
-        if not connection_pool:
-            ...
-            connection_pool = ConnectionPool(**kwargs)
-        self.connection_pool = connection_pool
-```
-
-+++
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
-
-### Redis-py connection pool
-
-#### Tests
-```python
-class DummyConnection(object):
-    description_format = "DummyConnection<>"
-
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-        self.pid = os.getpid()
-
-
-class TestConnectionPool(object):
-    def get_pool(self, connection_kwargs=None, max_connections=None,
-                 connection_class=DummyConnection):
-        connection_kwargs = connection_kwargs or {}
-        return redis.ConnectionPool(
-            connection_class=connection_class,
-            max_connections=max_connections,
-            **connection_kwargs)
-
-    def test_connection_creation(self):
-        connection_kwargs = {'foo': 'bar', 'biz': 'baz'}
-        pool = self.get_pool(connection_kwargs=connection_kwargs)
-        connection = pool.get_connection('_')
-        assert isinstance(connection, DummyConnection)
-        assert connection.kwargs == connection_kwargs
-```
+## Next steps
 
 ---
-### Multiple inheritance
+### Pytest for factories
 
 ```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-
-from .models import Booking
-
-
-class SessionFactory:
-
-    def __init__(self, db_uri):
-        self.db_uri = db_uri
-
-    def create_engine_and_session(self):
-        engine = create_engine(self.db_uri)
-        session = sessionmaker(bind=engine)
-        session = scoped_session(session)
-        return engine, session
-
-
-class BookingFactory(SessionFactory):
-
-    def create_booking(self, data):
-        session = self.create_engine_and_session()
-        booking = Booking(**data)
-        session.add(booking)
-        session.commit()
+class User(Base):
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(20))
 ```
 
 +++
-### Multiple inheritance
+### Pytest for factories
 
 ```python
-
-class MockSessionFactory(SessionFactory):
-
-    def create_engine_and_session(self):
-        engine = Mock()
-        session = Mock()
-        # Setup mocks
-        return engine, session
-
-
-class MockedBookingFactory(BookingFactory, MockSessionFactory):
-    pass
-```
-
-+++
-### Multiple inheritance
-
-Consider as an alternative
-
-Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
-
-+++
-@transition[none]
-@snap[north]
-<h3>Dependency injection</h3>
-@snapend
-
-@ul
-- @color[black](Decoupling execution from implementation)
-- @color[black](Easier to mock heavy dependencies)
-@ulend
-
-Note:
-Applying this approach allows you to decouple the execution of a task from its implementation.
-Now, you can pass any engine you want to the airplane and test its logic with different engines, or mock your engine to see if it’s too heavy for an ordinary test.
-For example, you could isolate some hard-to-test logic (e.g., a 3rd party service or some heavy computations) in this “dependency” and pass a mock object in tests instead of the real one.
-Flask allows you to write isolated extensions with ease, in pytest you can reuse and parametrize fixtures in tests.
-
----
-## Database
-
-### New database for each testcase with `testing.postgresql`
-
-```python
-import pytest
-import testing.postgresql
-
-
 @pytest.fixture
-def db_uri():
-    with testing.postgresql.Postgresql() as db:
-        yield db.url()
+def user_factory():
 
+    defaults = {
+        "name": "John Doe"
+    }
 
-@pytest.fixture
-def db(db_uri):
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-    database.db.init_app(app)
-    database.db.create_all()    
-    yield database.db
-    database.db.drop_all()
+    def _factory(**kwargs):
+        return User(**{**defaults, **kwargs})
+
+    return _factory
+
 ```
 
----
-## Database
-
-### Truncate all data for each testcase
++++
+### Pytest for factories
 
 ```python
-import pytest
-import testing.postgresql
-
-
-@pytest.fixture(scope="session")
-def db_uri():
-    with testing.postgresql.Postgresql() as db:
-        yield db.url()
-
-
-@pytest.fixture(scope="session")
-def db(db_uri):
-    app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-    database.db.init_app(app)
-    database.db.create_all()    
-    yield database.db
-    database.db.drop_all()
-
-
-@pytest.fixture(autouse=True)
-def session(db):
-    yield db.session
-    for table in reversed(db.metadata.sorted_tables):
-        db.session.execute(table.delete())
-    db.session.commit()
+def test_factory_fixture(user_factory):
+    assert user_factory().name == 'John Doe'
 ```
-
----
-## Database
-
-### Wrap each testcase into transaction
-### + pytest example
-
-```python
-@pytest.fixture(autouse=True)
-def session(db):
-    db.session.begin_nested()
-    yield db.session
-    db.session.rollback()
-    db.session.remove()
-```
-
----
-## Database
-
-### Consider using `pytest-pgsql`
-### It includes implementation of transactional and non-transactional cases
-
 ---
 @transition[none]
 @snap[north]
-<h3>Factories</h3>
+<h3>Factory boy</h3>
 @snapend
 
 ##### `factoryboy`
 
 ```python
-class User(Base):
-    id = Column(Integer(), primary_key=True)
-    name = Column(Unicode(20))
-
-
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
@@ -868,17 +819,246 @@ Note:
 pytest-factoryboy provides a lot of different features that are worth checking out.
 
 ---
-> Testing shows the presence, not the absence of bugs.
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
 
-##### Edsger W. Dijkstra
+```python
+def create_booking(session, data):
+    booking = Booking(**data)
+    session.add(booking)
+    session.commit()
+```
 
 Note:
-And the most important thing is the mindset - you should treat tests & testability as first-class citizens of your development process. 
+There is another technique that was used in the previous examples but wasn’t mentioned explicitly. Dependency injection.
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+### Redis-py connection pool + tests
+
+```python
+class StrictRedis(object):
+
+    def __init__(self, connection_pool=None, **kwargs):
+        if not connection_pool:
+            ...
+            connection_pool = ConnectionPool(**kwargs)
+        self.connection_pool = connection_pool
+```
+
++++
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+### Redis-py connection pool
+
+#### Tests
+```python
+class DummyConnection(object):
+    description_format = "DummyConnection<>"
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.pid = os.getpid()
+
+
+class TestConnectionPool(object):
+    def get_pool(self, connection_kwargs=None, max_connections=None,
+                 connection_class=DummyConnection):
+        connection_kwargs = connection_kwargs or {}
+        return redis.ConnectionPool(
+            connection_class=connection_class,
+            max_connections=max_connections,
+            **connection_kwargs)
+
+    def test_connection_creation(self):
+        connection_kwargs = {'foo': 'bar', 'biz': 'baz'}
+        pool = self.get_pool(connection_kwargs=connection_kwargs)
+        connection = pool.get_connection('_')
+        assert isinstance(connection, DummyConnection)
+        assert connection.kwargs == connection_kwargs
+```
 
 ---
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
 
-### Thank you
+@ul
+- @color[black](Decoupling execution from implementation)
+- @color[black](Easier to mock heavy dependencies)
+@ulend
+
+Note:
+Applying this approach allows you to decouple the execution of a task from its implementation.
+Now, you can pass any engine you want to the airplane and test its logic with different engines, or mock your engine to see if it’s too heavy for an ordinary test.
+For example, you could isolate some hard-to-test logic (e.g., a 3rd party service or some heavy computations) in this “dependency” and pass a mock object in tests instead of the real one.
+Flask allows you to write isolated extensions with ease, in pytest you can reuse and parametrize fixtures in tests.
+
+---
+### Multiple inheritance
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from .models import Booking
+
+
+class SessionFactory:
+
+    def __init__(self, db_uri):
+        self.db_uri = db_uri
+
+    def create_engine_and_session(self):
+        engine = create_engine(self.db_uri)
+        session = sessionmaker(bind=engine)
+        session = scoped_session(session)
+        return engine, session
+
+
+class BookingFactory(SessionFactory):
+
+    def create_booking(self, data):
+        session = self.create_engine_and_session()
+        booking = Booking(**data)
+        session.add(booking)
+        session.commit()
+```
+
++++
+### Multiple inheritance
+
+```python
+
+class MockSessionFactory(SessionFactory):
+
+    def create_engine_and_session(self):
+        engine = Mock()
+        session = Mock()
+        # Setup mocks
+        return engine, session
+
+
+class MockedBookingFactory(BookingFactory, MockSessionFactory):
+    pass
+```
+
++++
+### Multiple inheritance
+
+Consider as an alternative
+
+Raymond Hettinger: https://www.youtube.com/watch?v=EiOglTERPEo
+
+---
+## Database
+
+### New database for each testcase with `testing.postgresql`
+
+```python
+import pytest
+import testing.postgresql
+
+
+@pytest.fixture
+def db_uri():
+    with testing.postgresql.Postgresql() as db:
+        yield db.url()
+
+
+@pytest.fixture
+def db(db_uri):
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    database.db.init_app(app)
+    database.db.create_all()    
+    yield database.db
+    database.db.drop_all()
+```
+
+---
+## Database
+
+### Truncate all data for each testcase
+
+```python
+import pytest
+import testing.postgresql
+
+
+@pytest.fixture(scope="session")
+def db_uri():
+    with testing.postgresql.Postgresql() as db:
+        yield db.url()
+
+
+@pytest.fixture(scope="session")
+def db(db_uri):
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+    database.db.init_app(app)
+    database.db.create_all()    
+    yield database.db
+    database.db.drop_all()
+
+
+@pytest.fixture(autouse=True)
+def session(db):
+    yield db.session
+    for table in reversed(db.metadata.sorted_tables):
+        db.session.execute(table.delete())
+    db.session.commit()
+```
+
+---
+### Database
+
+### Wrap each testcase into transaction
+
+```python
+@pytest.fixture(autouse=True)
+def session(db):
+    db.session.begin_nested()
+    yield db.session
+    db.session.rollback()
+    db.session.remove()
+```
+
+---
+### Database
+
+### Consider using `pytest-pgsql`
+
+https://github.com/CloverHealth/pytest-pgsql
+
+---
+### Speed up the test suite
+
+- Put DB in RAM
+- Disable DB logs
+- Split your test suite
+- Run in parallel
+
+---
+## Results
+
+- Simpler codebase
+- Less unused code
+- Faster tests
+- Faster code review
+
+---
+## Thank you
 
 - https://github.com/Stranger6667
 - https://twitter.com/Stranger6667
-- https://code.kiwi.com/testable-code-making-the-testing-world-better-76b6461c630

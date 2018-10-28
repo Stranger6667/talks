@@ -445,8 +445,8 @@ settings = LazySettings()
 ```
 
 @[4-9]
-@[17-25]
-@[27]
+@[17-24]
+@[26]
 
 @snap[south]
 <b style="font-size:20px;">17.1</b>
@@ -505,8 +505,9 @@ def test_create_db_with_cert():
     # assert the output
 ```
 
+@[2]
 @[10-12]
-@[15-18]
+@[14-18]
 
 @snap[south]
 <b style="font-size:20px;">17.3</b>
@@ -791,7 +792,7 @@ Also, it used to register some teardown logic for this global object.
 +++
 @transition[none]
 @snap[north]
-<h3>Deferred initialization</h3>
+<h4>Deferred initialization</h3>
 @snapend
 
 ```python
@@ -990,7 +991,7 @@ def test_factory_fixture(user_factory):
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
-        sqlalchemy_session = session   # the SQLAlchemy session object
+        sqlalchemy_session = session
 
     id = factory.Sequence(lambda n: n)
     name = 'John Doe'
@@ -1042,8 +1043,6 @@ from pytest_factoryboy import register
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     ...
 ```
-
-@[1-4]
 
 @snap[south]
 <b style="font-size:20px;">28.3</b>
@@ -1100,7 +1099,7 @@ pytest-factoryboy provides a lot of different features that are worth checking o
 ---
 @transition[none]
 @snap[north]
-<h3>Dependency injection</h3>
+<h4>Dependency injection</h3>
 @snapend
 
 ```python
@@ -1120,10 +1119,10 @@ There is another technique that was used in the previous examples but wasn’t m
 +++
 @transition[none]
 @snap[north]
-<h3>Dependency injection</h3>
+<h4>Dependency injection</h3>
 @snapend
 
-### Redis-py connection pool + tests
+##### Redis-py connection pool + tests
 
 ```python
 class StrictRedis(object):
@@ -1144,12 +1143,12 @@ class StrictRedis(object):
 +++
 @transition[none]
 @snap[north]
-<h3>Dependency injection</h3>
+<h4>Dependency injection</h3>
 @snapend
 
-### Redis-py connection pool
+##### Redis-py connection pool
+##### Tests
 
-#### Tests
 ```python
 class DummyConnection(object):
     description_format = "DummyConnection<>"

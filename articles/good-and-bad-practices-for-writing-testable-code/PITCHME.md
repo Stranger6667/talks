@@ -235,7 +235,7 @@ DB_URI = os.environ.get(
     "DB_URI", 
     "postgresql://127.0.0.1/postgres"
 )
-
+APP_NAME = "projectA"
 SSL_CERTIFICATE_PATH = os.environ.get("SSL_CERTIFICATE_PATH")
 ```
 

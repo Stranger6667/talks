@@ -710,7 +710,7 @@ def db():
 @pytest.fixture
 def session(db, monkeypatch):
     db.begin_nested()
-    monkeypatch.setattr(database, "db", db)
+    monkeypatch.setattr(database, "session", db)
 
     yield db
 

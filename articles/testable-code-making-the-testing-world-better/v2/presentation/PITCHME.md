@@ -1227,7 +1227,7 @@ class SessionFactory:
 class BookingFactory(SessionFactory):
 
     def create_booking(self, data):
-        session, _ = self.create_engine_and_session()
+        _, session = self.create_engine_and_session()
         booking = Booking(**data)
         session.add(booking)
         session.commit()

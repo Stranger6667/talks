@@ -742,8 +742,7 @@ def app(db_uri):
 
 @pytest.fixture
 def db(app):
-    database.db.init_app(app)
-    database.db.create_all()    
+    database.db.create_all()   
     yield database.db
     database.db.drop_all()
 ```

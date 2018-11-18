@@ -744,7 +744,6 @@ def app(db_uri):
 def db(app):
     database.db.create_all()   
     yield database.db
-    database.db.drop_all()
 ```
 
 @[5-8]

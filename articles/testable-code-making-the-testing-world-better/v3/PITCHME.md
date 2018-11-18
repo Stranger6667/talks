@@ -712,10 +712,190 @@ Note:
 - Flexibility — multiple apps and/ore different settings. It’s available as a fixture, which provides more flexibility (e.g., parametrization)
 
 ---
+@transition[none]
+@snap[north]
+<h4>Dependency injection</h3>
+@snapend
+
+```python
+def create_booking(session, data):
+    booking = Booking(**data)
+    session.add(booking)
+    session.commit()
+```
+
+@snap[south]
+<b style="font-size:20px;">20.1</b>
+@snapend
+
+Note:
+There is another technique that was used in the previous examples but wasn’t mentioned explicitly. Dependency injection.
+
++++
+@transition[none]
+@snap[north]
+<h4>Dependency injection</h3>
+@snapend
+
+##### Redis-py connection pool
+
+```python
+class StrictRedis(object):
+
+    def __init__(self, connection_pool=None, **kwargs):
+        if not connection_pool:
+            ...
+            connection_pool = ConnectionPool(**kwargs)
+        self.connection_pool = connection_pool
+```
+
+@[4-6]
+@[7]
+
+@snap[south]
+<b style="font-size:20px;">20.2</b>
+@snapend
+
++++
+@transition[none]
+@snap[north]
+<h4>Dependency injection</h3>
+@snapend
+
+##### Tests
+
+```python
+class DummyConnection(object):
+    description_format = "DummyConnection<>"
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.pid = os.getpid()
+
+class TestConnectionPool(object):
+    def get_pool(self, 
+            connection_class=DummyConnection,
+            ...
+        ):
+        return redis.ConnectionPool(
+            connection_class=connection_class,
+            ...
+        )
+
+    def test_connection_creation(self):
+        connection_kwargs = {'foo': 'bar', 'biz': 'baz'}
+        pool = self.get_pool(connection_kwargs=connection_kwargs)
+        connection = pool.get_connection('_')
+        assert isinstance(connection, DummyConnection)
+        assert connection.kwargs == connection_kwargs
+```
+
+@[1-6]
+@[8-16]
+@[18-23]
+
+@snap[south]
+<b style="font-size:20px;">20.3</b>
+@snapend
+
+---
+@transition[none]
+@snap[north]
+<h3>Dependency injection</h3>
+@snapend
+
+@ul
+- @color[black](Decoupling execution from implementation)
+- @color[black](Easier to mock heavy dependencies)
+@ulend
+
+@snap[south]
+<b style="font-size:20px;">21</b>
+@snapend
+
+Note:
+Applying this approach allows you to decouple the execution of a task from its implementation.
+Now, you can pass any engine you want to the airplane and test its logic with different engines, or mock your engine to see if it’s too heavy for an ordinary test.
+For example, you could isolate some hard-to-test logic (e.g., a 3rd party service or some heavy computations) in this “dependency” and pass a mock object in tests instead of the real one.
+Flask allows you to write isolated extensions with ease, in pytest you can reuse and parametrize fixtures in tests.
+
+---
+### Multiple inheritance
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from .models import Booking
+
+class SessionFactory:
+
+    def __init__(self, db_uri):
+        self.db_uri = db_uri
+
+    def create_engine_and_session(self):
+        engine = create_engine(self.db_uri)
+        session = sessionmaker(bind=engine)
+        session = scoped_session(session)
+        return engine, session
+
+class BookingFactory(SessionFactory):
+
+    def create_booking(self, data):
+        _, session = self.create_engine_and_session()
+        booking = Booking(**data)
+        session.add(booking)
+        session.commit()
+```
+
+@[6-15]
+@[17-23]
+
+@snap[south]
+<b style="font-size:20px;">22.1</b>
+@snapend
+
++++
+### Multiple inheritance
+
+```python
+class MockSessionFactory(SessionFactory):
+
+    def create_engine_and_session(self):
+        engine = Mock()
+        session = Mock()
+        # Setup mocks
+        return engine, session
+
+class MockedBookingFactory(BookingFactory, MockSessionFactory):
+    pass
+```
+
+@[1-7]
+@[9-10]
+
+@snap[south]
+<b style="font-size:20px;">22.2</b>
+@snapend
+
++++
+### Multiple inheritance
+
+Consider as an alternative
+
+"super considered super!" by Raymond Hettinger. PyCon 2015
+
+https://www.youtube.com/watch?v=EiOglTERPEo
+
+@snap[south]
+<b style="font-size:20px;">22.3</b>
+@snapend
+
+---
 ## Next steps
 
 @snap[south]
-<b style="font-size:20px;">20</b>
+<b style="font-size:20px;">23</b>
 @snapend
 
 ---
@@ -751,7 +931,7 @@ def db(app):
 @[17-22]
 
 @snap[south]
-<b style="font-size:20px;">21</b>
+<b style="font-size:20px;">24</b>
 @snapend
 
 ---
@@ -781,7 +961,7 @@ def session(db):
 @[10-15]
 
 @snap[south]
-<b style="font-size:20px;">22</b>
+<b style="font-size:20px;">25</b>
 @snapend
 
 ---
@@ -802,7 +982,7 @@ def session(db):
 ```
 
 @snap[south]
-<b style="font-size:20px;">23</b>
+<b style="font-size:20px;">26</b>
 @snapend
 
 ---
@@ -813,7 +993,7 @@ def session(db):
 https://github.com/CloverHealth/pytest-pgsql
 
 @snap[south]
-<b style="font-size:20px;">24</b>
+<b style="font-size:20px;">27</b>
 @snapend
 
 ---
@@ -826,7 +1006,7 @@ https://github.com/CloverHealth/pytest-pgsql
 - Run in parallel
 
 @snap[south]
-<b style="font-size:20px;">25</b>
+<b style="font-size:20px;">28</b>
 @snapend
 
 ---
@@ -838,7 +1018,21 @@ https://github.com/CloverHealth/pytest-pgsql
 - Faster code review
 
 @snap[south]
-<b style="font-size:20px;">26</b>
+<b style="font-size:20px;">29</b>
+@snapend
+
+---
+## Conclusion
+
+- Beware of side effects on imports
+- Utilize lazy execution
+- Clear your caches (weakrefs are your friends)
+- Don't overuse monkey-patching
+- Dependency injection!
+- Choose your DB strategy
+
+@snap[south]
+<b style="font-size:20px;">30</b>
 @snapend
 
 ---
@@ -846,7 +1040,8 @@ https://github.com/CloverHealth/pytest-pgsql
 
 - https://github.com/Stranger6667
 - https://twitter.com/Stranger6667
+- dmitry.dygalo@kiwi.com
 
 @snap[south]
-<b style="font-size:20px;">27</b>
+<b style="font-size:20px;">31</b>
 @snapend

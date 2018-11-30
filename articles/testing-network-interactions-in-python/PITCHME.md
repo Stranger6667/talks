@@ -63,6 +63,12 @@ Note:
 ---
 ### Stack
 
+- Python 3.7
+- Flask + connexion
+- SQLAlchemy
+- PostgreSQL
+- Pytest
+
 +++
 ### Booking code
 

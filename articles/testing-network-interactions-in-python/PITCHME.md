@@ -16,15 +16,15 @@
 @snapend
 
 @snap[west span-30]
-@box[bg-green text-white](Project intro#<ul><li>Code</li><li>Integration tests</li></ul>)
+@box[bg-green text-white](Project intro#<ul style="list-style-type:none"><li>Code</li><li>Tests</li><li></li></ul>)
 @snapend
 
 @snap[midpoint span-30]
-@box[bg-green text-white](Mocked network#<ul><li>Ad hoc</li><li>Generic</li><li>Cassettes</li></ul>)
+@box[bg-green text-white](Mocked network#<ul style="list-style-type:none"><li>Ad hoc</li><li>Generic</li><li>Cassettes</li></ul>)
 @snapend
 
 @snap[east span-30]
-@box[bg-green text-white](Real life examples#<ul><li>API integration</li><li>Refactoring</li></ul>)
+@box[bg-green text-white](Real life examples#<ul style="list-style-type:none"><li>API integration</li><li>Refactoring</li></ul>)
 @snapend
 
 Note:

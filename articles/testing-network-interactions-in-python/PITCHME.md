@@ -15,26 +15,19 @@
 ### Overview
 @snapend
 
-@snap[west]
-**Project intro**
-
-- Code
-- Integration tests
+@snap[west span-35]
+@box[bg-green text-white](1. Project intro#- Code- Integration tests)
 @snapend
 
-@snap[midpoint]
-**Mocked network**
-
-- Ad hoc
+@snap[midpoint span-35]
+@box[bg-green text-white](2. Mocked network#- Ad hoc
 - Generic
-- Cassettes
+- Cassettes)
 @snapend
 
-@snap[east]
-**Real-life examples**
-
-- API integration
-- Refactoring
+@snap[east span-35]
+@box[bg-green text-white](3. Real-life examples#- API integration
+- Refactoring)
 @snapend
 
 Note:

@@ -10,8 +10,7 @@
 - @color[black](Love Python & open-source)
 
 ---
-### Overview
-
+@transition[none]
 @snap[north]
 ### Overview
 @snapend

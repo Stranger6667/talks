@@ -15,16 +15,16 @@
 ### Overview
 @snapend
 
-@snap[west span-35]
-@box[bg-green text-white](Project intro#@ul - Code<br>- Integration tests @ulend)
+@snap[west span-30]
+@box[bg-green text-white](Project intro#<ul><li>Code</li><li>Integration tests</li></ul>)
 @snapend
 
-@snap[midpoint span-25]
-@box[bg-green text-white](Mocked network#- Ad hoc<br>- Generic<br>- Cassettes)
+@snap[midpoint span-30]
+@box[bg-green text-white](Mocked network#<ul><li>Ad hoc</li><li>Generic</li><li>Cassettes</li></ul>)
 @snapend
 
-@snap[east span-35]
-@box[bg-green text-white](Real life examples#- API integration<br>- Refactoring)
+@snap[east span-30]
+@box[bg-green text-white](Real life examples#<ul><li>API integration</li><li>Refactoring</li></ul>)
 @snapend
 
 Note:

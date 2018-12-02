@@ -1,4 +1,6 @@
-#### Testing network interactions in Python
+### @color[black](Testing)
+### @color[black](network interactions)
+### @color[black](in Python)
 
 ---
 ### Who am I

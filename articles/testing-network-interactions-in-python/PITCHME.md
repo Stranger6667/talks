@@ -10,33 +10,6 @@
 - @color[black](Love Python & open-source)
 
 ---
-### Case study
-
-#### Monolithic app
-
-##### Flights booking
-
-+++
-### Case study
-
-#### Microservices 
-
-+++
-### Case study
-
-#### Looking for a good candidate
-
-+++
-### Case study
-
-#### Exchange rates
-
-+++
-### Case study
-
-#### Interact over network
-
----
 ### Overview
 
 **Project intro**
@@ -49,6 +22,11 @@
 - Ad hoc
 - Generic
 - Cassettes
+
+**Real-life examples**
+
+- API integration
+- Refactoring
 
 **Next steps**
 
@@ -66,10 +44,51 @@ Note:
 - Flask + connexion
 - SQLAlchemy
 - PostgreSQL
-- Pytest + Factory Boy
+- Pytest
+
+---
+### Case study
+
+#### Monolithic app
+
+##### Flights booking
+
+Note:
+Split monolith picture.
+Big Crate or something
 
 +++
-### Example
+### Case study
+
+#### Microservices 
+
+Note:
+Small containers picture
+
++++
+### Case study
+
+#### Looking for a good candidate
+
+Note:
+App structure, file tree screenshot with marked exchanges 
++++
+### Case study
+
+#### Exchange rates
+
+Note:
+Pic for exchange rates
++++
+### Case study
+
+#### Interact over network
+
+Note:
+Schema for new approach
+
+---
+### Code
 #### Models
 
 ```python
@@ -99,7 +118,7 @@ class ExchangeRate(db.Model):
 ```
 
 +++
-### Example
+### Code
 #### Application
 
 ```python
@@ -121,7 +140,7 @@ def create_app():
 @[8-10]
 
 +++
-### Example
+### Code
 #### Payments
 
 ```python
@@ -144,7 +163,7 @@ def save_transaction(booking_id: int, amount: Decimal, currency: str):
 @[9-11]
 
 +++
-### Example
+### Code
 #### Exchange
 
 ```python
@@ -166,7 +185,7 @@ def to_eur(amount: Decimal, currency: str):
 @[6-13]
 
 +++
-### Example
+### Code
 
 ##### factories.py
 
@@ -190,7 +209,7 @@ class ExchangeRateFactory(SQLAlchemyModelFactory):
 ```
 
 +++
-### Example
+### Code
 ##### conftest.py
 
 ```python
@@ -221,7 +240,7 @@ def database(app):
 ```
 
 +++
-### Example
+### Code
 ##### test_payments.py
 
 ```python
@@ -241,11 +260,14 @@ def test_save_transaction(exchange_rate_factory):
 
 def test_save_transaction_no_rates():
     with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "CZK")
+        save_transaction(1, Decimal(10), "NOK")
 ```
 
 ---
 ## Cutting out
+
+Note:
+Cutting the cake picture
 
 ---
 ### New exchange code (sync)
@@ -272,6 +294,14 @@ def to_eur(amount: Decimal, currency: str):
 +++
 ### Ad hoc tests
 
+Note:
+Picture - pretend that the code doesn't exist
+
++++
+### Ad hoc tests
+
+##### pytest-mock
+
 ```python
 from decimal import Decimal
 
@@ -290,7 +320,7 @@ def test_save_transaction(mocker):
 def test_save_transaction_no_rates(mocker):
     mocker.patch("booking.sync.exchange.to_eur", side_effect=NoExchangeRateError("No such rate"))
     with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "CZK")
+        save_transaction(1, Decimal(10), "NOK")
 ```
 
 +++
@@ -300,26 +330,22 @@ def test_save_transaction_no_rates(mocker):
 @pytest.fixture
 def setup_rates(mocker):
 
-    def inner(value):
-        if isinstance(value, Exception):
-            kwargs = {"side_effect": value}
-        else:
-            kwargs = {"return_value": value}
+    def inner(**kwargs):
         mocker.patch("booking.sync.exchange.to_eur", **kwargs)
 
     return inner
 
 
 def test_save_transaction(setup_rates):
-    setup_rates(Decimal(255))
+    setup_rates(return_value=Decimal(255))
     transaction = save_transaction(1, Decimal(10), "CZK")
     assert transaction.amount_eur == 255
 
 
 def test_save_transaction_no_rates(setup_rates):
-    setup_rates(NoExchangeRateError("No such rate"))
+    setup_rates(side_effect=NoExchangeRateError("No such rate"))
     with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "CZK")
+        save_transaction(1, Decimal(10), "NOK")
 ```
 
 +++
@@ -337,6 +363,7 @@ def test_save_transaction():
     transaction = save_transaction(1, Decimal(10), "CZK")
     assert transaction.amount_eur == 255
 ```
+
 ---
 ### Async version with aiohttp
 
@@ -355,11 +382,11 @@ async def to_eur(amount: Decimal, currency: str):
             data = await response.json()
             try:
                 response.raise_for_status()
-                return Decimal(data["result"])
             except aiohttp.ClientResponseError:
                 if data["detail"] == "No such rate":
                     raise NoExchangeRateError
                 raise
+            return Decimal(data["result"])
 ```
 +++
 ### Async payments
@@ -371,7 +398,7 @@ async def save_transaction(booking_id: int, amount: Decimal, currency: str):
     """We need to store EUR amount as well."""
     amount_eur = await exchange.to_eur(amount, currency)
 
-    return await asyncpg_save(booking_id, amount, currency, amount_eur)
+    ...
 ```
 +++
 ### Ad hoc tests
@@ -381,7 +408,6 @@ pytestmark = [pytest.mark.usefixtures("database"), pytest.mark.asyncio]
 
 
 async def test_save_transaction(mocker):
-
     async def coro():
         return Decimal(255)
 
@@ -391,9 +417,13 @@ async def test_save_transaction(mocker):
 
 
 async def test_save_transaction_no_rates(mocker):
-    mocker.patch("booking.aio.exchange.to_eur", side_effect=NoExchangeRateError("No such rate"))
+    async def coro():
+        raise NoExchangeRateError("No such rate")
+
+    mocker.patch("booking.aio.exchange.to_eur", return_value=coro())
     with pytest.raises(NoExchangeRateError, message="No such rate"):
-        await save_transaction(1, Decimal(10), "CZK")
+        await save_transaction(1, Decimal(10), "NOK")
+
 ```
 
 ---
@@ -401,6 +431,8 @@ async def test_save_transaction_no_rates(mocker):
 
 ##### Pros:
 - Easy to setup
+- Flexible
+- Doesn't actually test API wrapper
 
 ##### Cons:
 - Becomes messy very fast
@@ -410,7 +442,7 @@ Note:
 These kind of tests are good if you can afford saying - I don't care what this part does internally, 
 I just assume that it should return this data in this situation.
 It could work for small and simple parts from time to time or it could work as a temporary solution.
-I personally can afford myself this level of confidence in the code
+But usually you can't afford yourself this level of confidence in the code
 
 ---
 ### Generic libs
@@ -418,25 +450,24 @@ I personally can afford myself this level of confidence in the code
 #### Responses
 
 ```python
-
 def test_save_transaction(responses):
-    responses.add(responses.GET, "https://rates.kiwi.com/to_eur", body='{"result": 255}')
+    responses.add(responses.GET, "https://rates.kiwi.com/to_eur", body='{"result": "255"}')
     transaction = save_transaction(1, Decimal(10), "CZK")
     assert transaction.amount_eur == 255
 ```
+
 +++
 ### Emulate exception
 
-
 ```python
-def test_save_transaction_no_rates(responses):
-    responses.add(responses.GET, "https://rates.kiwi.com/to_eur", body=NoExchangeRateError("No such rate"))
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "CZK")
+def test_save_transaction_exception(responses):
+    responses.add(responses.GET, "http://127.0.0.1:5000/to_eur", body=requests.ConnectionError("Error"))
+    with pytest.raises(requests.ConnectionError, message="Error"):
+        save_transaction(1, Decimal(10), "NOK")
 ```
 
 +++
-### Dynamic response
+### Dynamic responses
 
 ```python
 
@@ -447,72 +478,190 @@ def setup_rates(responses):
         query_string = dict(parse_qsl(parsed.query))
         amount = Decimal(query_string["amount"])
         currency = query_string["currency"]
-        rates = {
-            "CZK": Decimal("25.5")
-        }
+        rates = {"CZK": Decimal("25.5")}
         try:
             rate = rates[currency]
-            value = json.dumps({"result": str(rate * amount)})
+            result = {"result": str(rate * amount)}
+            status = 200
         except KeyError:
-            value = NoExchangeRateError("No such rate")
-        return 200, {}, value
+            result = {"detail": "No such rate"}
+            status = 400
+        return status, {}, json.dumps(result)
 
-    responses.add_callback(responses.GET, "https://rates.kiwi.com/to_eur", callback=request_callback)
+    responses.add_callback(responses.GET, "http://127.0.0.1:5000/to_eur", callback=request_callback)
 
 
 @pytest.mark.usefixtures("setup_rates")
-def test_save_transaction_dynamic(responses):
+def test_save_transaction_dynamic():
     ...
 
 ```
 +++
 ### Pros & cons
 
+Pros:
+- Feature-rich
+
+Cons:
+- Requests only
+
 ---
 ### Async way
 
 #### Aio-responses
 
+```python
+@pytest.fixture
+def aioresponses():
+    with _aioresponses() as mock:
+        yield mock
+
+
+async def test_save_transaction(aioresponses):
+    aioresponses.get(re.compile(r"^http://127.0.0.1:5000/to_eur.*$"), payload={"result": "255"})
+    transaction = await save_transaction(1, Decimal(10), "CZK")
+    assert transaction.amount_eur == 255
+
+
+async def test_save_transaction_no_rates(aioresponses):
+    aioresponses.get(re.compile(r"^http://127.0.0.1:5000/to_eur.*$"), payload={"detail": "No such rate"}, status=400)
+    with pytest.raises(NoExchangeRateError, message="No such rate"):
+        await save_transaction(1, Decimal(10), "NOK")
+```
 +++
 ### Pros & cons
+
+Pros:
+- Limited number of features comparing to responses
+
+Cons:
+- aiohttp only
 
 ---
 ### Sync and async
 
 #### Pook
 
+```python
+@pytest.fixture
+def pook():
+    import pook
+
+    pook.on()
+
+    yield pook
+    pook.off()
+```
 +++
-### Examples
+### Sync examples
+
+```python
+pytestmark = [pytest.mark.usefixtures("database")]
+
+def test_save_transaction(pook):
+    pook.get("http://127.0.0.1:5000/to_eur", response_json={"result": 255})
+    transaction = save_transaction(1, Decimal(10), "CZK")
+    assert transaction.amount_eur == 255
+
+def test_save_transaction_no_rates(pook):
+    pook.get("http://127.0.0.1:5000/to_eur", response_json={"detail": "No such rate"}, response_status=400)
+    with pytest.raises(NoExchangeRateError, message="No such rate"):
+        save_transaction(1, Decimal(10), "NOK")
+```
+
++++
+### Async examples
+
+```python
+
+pytestmark = [pytest.mark.usefixtures("database"), pytest.mark.asyncio]
+
+async def test_save_transaction(pook):
+    pook.get("http://127.0.0.1:5000/to_eur", response_json={"result": 255})
+    transaction = await save_transaction(1, Decimal(10), "CZK")
+    assert transaction.amount_eur == 255
+
+
+async def test_save_transaction_no_rates(pook):
+    pook.get("http://127.0.0.1:5000/to_eur", response_json={"detail": "No such rate"}, response_status=400)
+    with pytest.raises(NoExchangeRateError, message="No such rate"):
+        await save_transaction(1, Decimal(10), "NOK")
+```
 
 +++
 ### Pros & cons
+
+Pros:
+- Works for requests, urllib3, urllib, http-client, aiohttp
+- Feature-rich
+
+Cons:
+- Doesn't support aiohttp > 3
 
 ---
 ### Generic libs summary
 
 Pros:
-- Convenient API
+- Convenient API for certain use-cases
 - Multiple requests
 
 Cons:
-- A lot of manual work
+- Sometimes requires more manual work
 
 ---
 ### Cassettes
 
 Notes:
-Description
+Description.
+Cassette picture
 
 +++
 ### Libraries
 
-VCRPy, Betamax (requests-only)
+- VCRPy
+- Betamax (requests-only)
 
 +++
 ### Example
 
+```python
+pytestmark = [pytest.mark.usefixtures("database"), pytest.mark.vcr]
+
+
+def test_save_transaction():
+    transaction = save_transaction(1, Decimal(10), "CZK")
+    assert transaction.amount_eur == 255
+
+
+def test_save_transaction_no_rates():
+    with pytest.raises(NoExchangeRateError, message="No such rate"):
+        save_transaction(1, Decimal(10), "NOK")
+
+```
 +++
 ### Cassette
+
+```yaml
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.20.1]
+    method: GET
+    uri: http://127.0.0.1:5000/to_eur?amount=10&currency=CZK
+  response:
+    body: {string: '{"result":"255.0"}'}
+    headers:
+      Content-Length: ['19']
+      Content-Type: [application/json]
+      Date: ['Sun, 02 Dec 2018 12:21:47 GMT']
+      Server: [Werkzeug/0.14.1 Python/3.7.0]
+    status: {code: 200, message: OK}
+version: 1
+```
 
 +++
 ### Record modes
@@ -520,8 +669,42 @@ VCRPy, Betamax (requests-only)
 +++
 ### HTTP libraries support
 
+- aiohttp
+- http.client
+- requests
+- urllib2
+- urllib3
+- ...
+
 +++
 ### Pros & cons
+
+Pros:
+- Easy to use
+- Supports many http clients
+
+Cons:
+- No network exceptions emulation
+
+---
+### Real-life examples
+
+Note:
+Funny image
+
++++
+### API integration
+
++++
+### Refactoring use case
+
+---
+## Mocked network use cases
+
+- Splitting monolithic apps
+- API integrations in TDD style
+- Fake responses of external APIs
+- Refactoring of tightly-coupled code
 
 ---
 ## Real network

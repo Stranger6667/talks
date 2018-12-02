@@ -12,30 +12,35 @@
 ---
 ### Overview
 
+@snap[north]
+### Overview
+@snapend
+
+@snap[west]
 **Project intro**
 
 - Code
-- Integration tests 
+- Integration tests
+@snapend
 
+@snap[midpoint]
 **Mocked network**
 
 - Ad hoc
 - Generic
 - Cassettes
+@snapend
 
+@snap[east]
 **Real-life examples**
 
 - API integration
 - Refactoring
-
-**Next steps**
-
-- Real network
+@snapend
 
 Note:
 - monolith
 - in progress (no real need for an external service)
-- Real microservice
 
 ---
 ### Stack
@@ -280,7 +285,7 @@ import requests
 from .exceptions import NoExchangeRateError
 
 def to_eur(amount: Decimal, currency: str):
-    response = requests.get("https://rates.kiwi.com/to_eur", params={"amount": amount, "currency": currency})
+    response = requests.get("http://127.0.0.1:5000/to_eur", params={"amount": amount, "currency": currency})
     data = response.json()
     try:
         response.raise_for_status()
@@ -377,7 +382,7 @@ from .exceptions import NoExchangeRateError
 async def to_eur(amount: Decimal, currency: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            "https://rates.kiwi.com/to_eur", params={"amount": amount, "currency": currency}
+            "http://127.0.0.1:5000/to_eur", params={"amount": amount, "currency": currency}
         ) as response:
             data = await response.json()
             try:
@@ -451,7 +456,7 @@ But usually you can't afford yourself this level of confidence in the code
 
 ```python
 def test_save_transaction(responses):
-    responses.add(responses.GET, "https://rates.kiwi.com/to_eur", body='{"result": "255"}')
+    responses.add(responses.GET, "http://127.0.0.1:5000/to_eur", body='{"result": "255"}')
     transaction = save_transaction(1, Decimal(10), "CZK")
     assert transaction.amount_eur == 255
 ```
@@ -504,38 +509,6 @@ Pros:
 
 Cons:
 - Requests only
-
----
-### Async way
-
-#### Aio-responses
-
-```python
-@pytest.fixture
-def aioresponses():
-    with _aioresponses() as mock:
-        yield mock
-
-
-async def test_save_transaction(aioresponses):
-    aioresponses.get(re.compile(r"^http://127.0.0.1:5000/to_eur.*$"), payload={"result": "255"})
-    transaction = await save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
-
-
-async def test_save_transaction_no_rates(aioresponses):
-    aioresponses.get(re.compile(r"^http://127.0.0.1:5000/to_eur.*$"), payload={"detail": "No such rate"}, status=400)
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
-        await save_transaction(1, Decimal(10), "NOK")
-```
-+++
-### Pros & cons
-
-Pros:
-- Limited number of features comparing to responses
-
-Cons:
-- aiohttp only
 
 ---
 ### Sync and async
@@ -664,9 +637,6 @@ version: 1
 ```
 
 +++
-### Record modes
-
-+++
 ### HTTP libraries support
 
 - aiohttp
@@ -692,37 +662,135 @@ Cons:
 Note:
 Funny image
 
+---
+### API integration
+
+#### MasterCard XML API
+
+```python
+@pytest.fixture
+def mastercard():
+    return MasterCardAPIClient()
+
+
+@pytest.mark.vrc(record_mode="all")
+async def test_create_card(mocker, mastercard):
+    card = await mastercard.create_card(100, "EUR")
+    assert card == {
+        "amount": 100,
+        "currency": "EUR",
+        "number": mocker.ANY,
+        "security_code": mocker.ANY,
+        "holder": mocker.ANY,
+    }
+
+```
+
 +++
 ### API integration
+#### Client class
+
+```
+from lxml import etree
+from lxml.builder import E
+
+@attr.s()
+class MasterCardAPIClient:
+    """API client for MasterCard XML API."""
+
+    ...
+
+    def build_payload(self, *commands):
+        """Build an XML payload for a request to MasterCard API."""
+        payload = ...
+        return payload
+
+    async def _call(self, *commands):
+        """Make a call to MasterCard API."""
+        payload = self.build_payload(*commands)
+        response = await xml_request(
+            "POST", url=self.url, data=payload, verify_ssl=self.verify_ssl, cert=self.request_pem
+        )
+        parsed = etree.fromstring(response._body)
+        error = parsed.find("Error")
+        if error is not None:
+            raise MasterCardAPIError(error)
+        return parsed
+
+    async def create_card(self, amount: str, currency: str):
+        response = await self._call(
+            E.CreatePurchaseRequest(
+                Amount=amount,
+                CurrencyCode=currency,
+                PurchaseType=...,
+                SupplierName=...,
+                ValidFor=...,
+            ),
+            E.ApprovePurchaseRequest(),
+            E.GetCPNDetailsRequest(),
+        )
+        return {
+            ...
+        }
+
+```
+
++++
+### Process
+
+1. Write a test with `all` VCR record mode
+2. Add code
+3. Run test with sandbox credentials
+4. Adapt code and test until it works
+5. Make your assertions stronger
+6. Repeat
+ 
+---
+### Refactoring use case
+
+- 2k lines of code class
+- Multiple external API calls
+- Tight coupling. Everything depends on the instance's state
+- No tests
 
 +++
 ### Refactoring use case
 
+```python
+@pytest.mark.vcr()
+def test_ancillaries_core():
+    core = BigScaryClass("123", "test_service", "test", None)
+    core.load_data()
+    assert core.flights == {...}
+    assert core.reservations == [...]
+    assert core.segments == {...}
+    assert core.passengers == {...}
+```
+
++++
+### Process
+
+- Choose code that you could run on production harmlessly
+- Record all network interactions
+- Add detailed assertions
+- Refactor and add new tests for refactored code
+- Repeat until you're happy with new code
+- Repeat on the higher abstraction level
+
++++
+### Result
+
+- Same high-level interface as before
+- Much better internal structure
+- You actually have tests
+
 ---
-## Mocked network use cases
+## Summary
 
 - Splitting monolithic apps
 - API integrations in TDD style
 - Fake responses of external APIs
 - Refactoring of tightly-coupled code
-
----
-## Real network
-
-+++
-### Docker
-
-Note:
-Architectural overview
-
-+++
-### Libraries examples
-
-+++
-### Pros & cons
-
----
-### Summary
 
 ---
 ### Thank you

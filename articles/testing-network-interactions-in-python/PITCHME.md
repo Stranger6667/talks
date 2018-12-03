@@ -473,7 +473,7 @@ async def test_save_transaction_no_rates(mocker):
 ---
 @transition[none]
 
-@snap[north-west span-40]
+@snap[north-west span-45]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -483,7 +483,7 @@ async def test_save_transaction_no_rates(mocker):
 </ul>
 @snapend
 
-@snap[north-east span-40]
+@snap[north-east span-45]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>

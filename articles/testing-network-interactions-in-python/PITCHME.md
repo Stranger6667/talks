@@ -852,8 +852,6 @@ version: 1
 ---
 ### API integration
 
-#### MasterCard XML API
-
 ```python
 @pytest.fixture
 def mastercard():
@@ -874,9 +872,10 @@ async def test_create_card(mocker, mastercard):
 @[1-3]
 @[5-14]
 
+#### MasterCard XML API
+
 +++
 ### API integration
-#### Client class
 
 ```
 from lxml import etree
@@ -922,13 +921,15 @@ class MasterCardAPIClient:
 @[4-7]
 @[9-21]
 @[23-25]
-@[26-31]
-@[32-36]
+@[26-32]
+@[33-37]
+
+#### Client class
 
 +++
-### Process
+### API integration process
 
-1. Write a test with `all` VCR record mode
+1. Write a test with **`all`** VCR record mode
 2. Add code
 3. Run test with sandbox credentials
 4. Adapt code and test until it works
@@ -936,7 +937,7 @@ class MasterCardAPIClient:
 6. Repeat
  
 ---
-### Refactoring use case
+### Refactoring example
 
 - 2k lines of code class
 - Multiple external API calls
@@ -944,7 +945,7 @@ class MasterCardAPIClient:
 - No tests
 
 +++
-### Refactoring use case
+### Refactoring example
 
 ```python
 class BigScaryClass(object):
@@ -964,9 +965,10 @@ class BigScaryClass(object):
 @[3-6]
 @[8-12]
 
-##### Code sample
+##### Target class
+
 +++
-### Refactoring use case
+### Refactoring example
 
 ```python
 @pytest.mark.vcr()
@@ -984,7 +986,17 @@ def test_ancillaries_core():
 @[5-8]
 
 +++
-### Refactoring use case
+### Process
+
+- Choose code that you can run on production
+- Record all network interactions for different cases
+- Add detailed assertions
+- Refactor and add new tests for refactored code
+- Repeat until you're happy with new code
+- Repeat on the higher abstraction level
+
++++
+### Refactoring example
 
 ```python
 @attr.s
@@ -1004,16 +1016,6 @@ class BigScaryClass:
 @[6-11]
 
 +++
-### Process
-
-- Choose code that you could run on production harmlessly
-- Record all network interactions for different cases
-- Add detailed assertions
-- Refactor and add new tests for refactored code
-- Repeat until you're happy with new code
-- Repeat on the higher abstraction level
-
-+++
 ### Result
 
 - Same high-level interface as before
@@ -1021,7 +1023,7 @@ class BigScaryClass:
 - You actually have tests
 
 ---
-## Summary
+## How you could these approaches?
 
 - Splitting monolithic apps
 - API integrations in TDD style

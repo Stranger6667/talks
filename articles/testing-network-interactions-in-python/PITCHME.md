@@ -188,7 +188,7 @@ def to_eur(amount, currency):
     ).one_or_none()
     if not rate:
         raise NoExchangeRateError("No such rate")
-    return rate.ratio * amount
+    return amount / rate.ratio
 ```
 
 @[6-7]
@@ -253,8 +253,8 @@ pytestmark = [pytest.mark.usefixtures("database")]
 
 def test_save_transaction(exchange_rate_factory):
     exchange_rate_factory(currency="CZK", ratio="25.5")
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == Decimal(255)
+    transaction = save_transaction(1, Decimal(2550), "CZK")
+    assert transaction.amount_eur == Decimal(100)
 
 def test_save_transaction_no_rates():
     with pytest.raises(
@@ -312,7 +312,7 @@ def to_eur(amount, currency):
 def test_save_transaction(mocker):
     mocker.patch(
         "booking.sync.exchange.to_eur", 
-        return_value=Decimal(255)
+        return_value=Decimal(100)
     )
     ...
 
@@ -342,7 +342,7 @@ def setup_rates(mocker):
     return inner
 
 def test_save_transaction(setup_rates):
-    setup_rates(return_value=Decimal(255))
+    setup_rates(return_value=Decimal(100))
     ...
 
 def test_save_transaction_no_rates(setup_rates):
@@ -364,7 +364,7 @@ def setup(request, mocker):
     if mark:
         mocker.patch("booking.sync.exchange.to_eur", **mark.kwargs)
 
-@pytest.mark.setup_rates(return_value=Decimal(255))
+@pytest.mark.setup_rates(return_value=Decimal(100))
 def test_save_transaction():
     ...
 ```
@@ -424,7 +424,7 @@ pytestmark = [
 
 async def test_save_transaction(mocker):
     async def coro():
-        return Decimal(255)
+        return Decimal(100)
 
     mocker.patch(
         "booking.aio.exchange.to_eur", 
@@ -433,7 +433,7 @@ async def test_save_transaction(mocker):
     transaction = await save_transaction(
         1, Decimal(10), "CZK"
     )
-    assert transaction.amount_eur == Decimal(255)
+    ...
 
 async def test_save_transaction_no_rates(mocker):
     async def coro():
@@ -486,7 +486,7 @@ def test_save_transaction(responses):
     responses.add(
         responses.GET, 
         "http://127.0.0.1:5000/to_eur", 
-        body='{"result": "255"}'
+        body='{"result": "100"}'
     )
     ...
 ```
@@ -520,7 +520,7 @@ def setup_rates(responses):
         rates = {"CZK": Decimal("25.5")}
         try:
             rate = rates[currency]
-            result = {"result": str(rate * amount)}
+            result = {"result": str(amount / rate)}
             status = 200
         except KeyError:
             result = {"detail": "No such rate"}
@@ -572,7 +572,7 @@ pytestmark = [pytest.mark.usefixtures("database")]
 def test_save_transaction(pook):
     pook.get(
         "http://127.0.0.1:5000/to_eur", 
-        response_json={"result": 255}
+        response_json={"result": 100}
     )
     ...
 
@@ -598,7 +598,7 @@ pytestmark = [
 async def test_save_transaction(pook):
     pook.get(
         "http://127.0.0.1:5000/to_eur", 
-        response_json={"result": 255}
+        response_json={"result": 100}
     )
     ...
 
@@ -654,8 +654,8 @@ pytestmark = [
 
 
 def test_save_transaction():
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == Decimal(255)
+    transaction = save_transaction(1, Decimal(2550), "CZK")
+    assert transaction.amount_eur == Decimal(100)
 
 
 def test_save_transaction_no_rates():
@@ -680,7 +680,7 @@ interactions:
     method: GET
     uri: http://127.0.0.1:5000/to_eur?amount=10&currency=CZK
   response:
-    body: {string: '{"result":"255.0"}'}
+    body: {string: '{"result":"100.0"}'}
     headers:
       Content-Length: ['19']
       Content-Type: [application/json]

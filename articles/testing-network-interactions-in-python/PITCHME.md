@@ -39,7 +39,7 @@
 @snap[east span-30]
 <div id="boxed-text-box" class="bg-green text-white">
     <div id="boxed-text-title-box">
-        <span id="boxed-text-title" style="font-size: 80%">Mocked network</span>
+        <span id="boxed-text-title" style="font-size: 80%">Real examples</span>
     </div>
     <snap style="font-size: 70%">API integration</snap><br>
     <snap style="font-size: 70%">Refactoring</snap>

@@ -266,8 +266,7 @@ def test_save_transaction_no_rates():
 ---
 ## Cutting out
 
-Note:
-Cutting the cake picture
+<img src="articles/testing-network-interactions-in-python/img/cake-cut.jpg" alt="Cutting out" height="400px"/>
 
 ---
 ### New exchange code (sync)

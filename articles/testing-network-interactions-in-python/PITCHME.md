@@ -786,8 +786,8 @@ def handle_no_rate(error):
 @[1-5] Flask app
 @[7-9] Sample rates
 @[11-16] Rate conversion
-@[17-21] App route
-@[23-30] Error handling
+@[18-22] App route
+@[24-31] Error handling
  
 +++
 ### Cassette
@@ -811,15 +811,7 @@ version: 1
 @[2-7]
 @[8-12]
 
-+++
-### HTTP libraries support
-
-- aiohttp
-- http.client
-- requests
-- urllib2
-- urllib3
-- ...
+#### cassettes/test_save_transaction.yaml
 
 +++
 ### Libraries
@@ -850,6 +842,9 @@ version: 1
 @snapend
 
 ---
+### Combine these approaches!
+
+---
 ### Real-life examples
 
 <img src="articles/testing-network-interactions-in-python/img/reality.jpg" alt="Reality" height="400px"/>
@@ -877,7 +872,7 @@ async def test_create_card(mocker, mastercard):
 ```
 
 @[1-3]
-@[5-13]
+@[5-14]
 
 +++
 ### API integration
@@ -926,9 +921,9 @@ class MasterCardAPIClient:
 @[1-2]
 @[4-7]
 @[9-21]
-@[22-24]
-@[25-30]
-@[31-35]
+@[23-25]
+@[26-31]
+@[32-36]
 
 +++
 ### Process

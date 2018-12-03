@@ -510,6 +510,8 @@ def test_save_transaction_exception(responses):
 ```python
 ...
 
+RATES = {"CZK": Decimal("25.5")}
+
 @pytest.fixture
 def setup_rates(responses):
     def request_callback(request):
@@ -517,10 +519,9 @@ def setup_rates(responses):
         query_string = dict(parse_qsl(parsed.query))
         amount = Decimal(query_string["amount"])
         currency = query_string["currency"]
-        rates = {"CZK": Decimal("25.5")}
         try:
-            rate = rates[currency]
-            result = {"result": str(amount / rate)}
+            rate = RATES[currency]
+            result = {"result": format(amount / rate, ".2f")}
             status = 200
         except KeyError:
             result = {"detail": "No such rate"}
@@ -533,12 +534,17 @@ def setup_rates(responses):
         callback=request_callback
     )
 
-
 @pytest.mark.usefixtures("setup_rates")
 def test_save_transaction_dynamic():
     ...
-
 ```
+
+@[5-6]
+@[7-11]
+@[12-19]
+@[21-24]
+@[26]
+
 +++
 ### Pros & cons
 
@@ -567,7 +573,7 @@ def pook():
 ### Sync examples
 
 ```python
-pytestmark = [pytest.mark.usefixtures("database")]
+...
 
 def test_save_transaction(pook):
     pook.get(
@@ -584,11 +590,14 @@ def test_save_transaction_no_rates(pook):
     )
     ...
 ```
+@[3-7]
+@[10-15]
 
 +++
 ### Async examples
 
 ```python
+...
 
 pytestmark = [
     pytest.mark.usefixtures("database"), 
@@ -602,7 +611,6 @@ async def test_save_transaction(pook):
     )
     ...
 
-
 async def test_save_transaction_no_rates(pook):
     pook.get(
         "http://127.0.0.1:5000/to_eur", 
@@ -611,6 +619,10 @@ async def test_save_transaction_no_rates(pook):
     )
     ...
 ```
+
+@[3-6]
+@[8-12]
+@[15-19]
 
 +++
 ### Pros & cons
@@ -647,16 +659,16 @@ Cons:
 ### Example
 
 ```python
+...
+
 pytestmark = [
     pytest.mark.usefixtures("database"), 
     pytest.mark.vcr
 ]
 
-
 def test_save_transaction():
     transaction = save_transaction(1, Decimal(2550), "CZK")
     assert transaction.amount_eur == Decimal(100)
-
 
 def test_save_transaction_no_rates():
     with pytest.raises(
@@ -665,6 +677,11 @@ def test_save_transaction_no_rates():
     ):
         save_transaction(1, Decimal(10), "NOK")
 ```
+
+@[3-6]
+@[8-10]
+@[12-17]
+
 +++
 ### Actual microservice
 
@@ -727,6 +744,9 @@ interactions:
 version: 1
 ```
 
+@[2-7]
+@[8-12]
+
 +++
 ### HTTP libraries support
 
@@ -763,7 +783,6 @@ Funny image
 def mastercard():
     return MasterCardAPIClient()
 
-
 @pytest.mark.vrc(record_mode="all")
 async def test_create_card(mocker, mastercard):
     card = await mastercard.create_card(100, "EUR")
@@ -774,8 +793,10 @@ async def test_create_card(mocker, mastercard):
         "security_code": mocker.ANY,
         "holder": mocker.ANY,
     }
-
 ```
+
+@[1-3]
+@[5-13]
 
 +++
 ### API integration
@@ -788,13 +809,21 @@ from lxml.builder import E
 @attr.s()
 class MasterCardAPIClient:
     """API client for MasterCard XML API."""
-
     ...
-
-    def build_payload(self, *commands):
-        """Build an XML payload for MasterCard API."""
-        payload = ...
-        return payload
+    
+    async def create_card(self, amount, currency):
+        response = await self._call(
+            E.CreatePurchaseRequest(
+                Amount=amount,
+                CurrencyCode=currency,
+                ...
+            ),
+            ...
+        )
+        return {
+            "amount": ...,
+            ...
+        }
 
     async def _call(self, *commands):
         """Make a call to MasterCard API."""
@@ -810,21 +839,15 @@ class MasterCardAPIClient:
         error = parsed.find("Error")
         if error is not None:
             raise MasterCardAPIError(error)
-        return parsed
-
-    async def create_card(self, amount, currency):
-        response = await self._call(
-            E.CreatePurchaseRequest(
-                Amount=amount,
-                CurrencyCode=currency,
-                ...
-            ),
-            ...
-        )
-        return {
-            ...
-        }
+        return parsed   
 ```
+
+@[1-2]
+@[4-7]
+@[9-21]
+@[22-24]
+@[25-30]
+@[31-35]
 
 +++
 ### Process
@@ -862,6 +885,9 @@ class BigScaryClass(object):
         ...
 ```
 
+@[3-6]
+@[8-12]
+
 ##### Code sample
 +++
 ### Refactoring use case
@@ -876,6 +902,10 @@ def test_ancillaries_core():
     assert core.segments == {...}
     assert core.passengers == {...}
 ```
+
+@[1]
+@[3-4]
+@[5-8]
 
 +++
 ### Refactoring use case
@@ -893,6 +923,9 @@ class BigScaryClass:
         # Most of the new code is stateless 
         ...
 ```
+
+@[1-4]
+@[6-11]
 
 +++
 ### Process

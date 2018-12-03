@@ -464,16 +464,9 @@ async def test_save_transaction_no_rates(mocker):
 #### pytest-asyncio
 
 ---
-### Tools
-
-- unittest.mock
-- pytest-mock
-- pytest-asyncio
-
----
 @transition[none]
 
-@snap[north-west span-45]
+@snap[west span-45]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -483,7 +476,7 @@ async def test_save_transaction_no_rates(mocker):
 </ul>
 @snapend
 
-@snap[north-east span-45]
+@snap[east span-45]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
@@ -571,7 +564,7 @@ def test_save_transaction_dynamic():
 ---
 @transition[none]
 
-@snap[north-west span-45]
+@snap[west span-45]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -580,7 +573,7 @@ def test_save_transaction_dynamic():
 </ul>
 @snapend
 
-@snap[north-east span-45]
+@snap[east span-45]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
@@ -663,7 +656,7 @@ async def test_save_transaction_no_rates(pook):
 ---
 @transition[none]
 
-@snap[north-west span-45]
+@snap[west span-45]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -672,7 +665,7 @@ async def test_save_transaction_no_rates(pook):
 </ul>
 @snapend
 
-@snap[north-east span-45]
+@snap[east span-45]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
@@ -682,16 +675,11 @@ async def test_save_transaction_no_rates(pook):
 @snapend
 
 ---
-### Tools
+### Generic libs summary
 
-- responses
-- pytest-responses
-- pook
-
----
 @transition[none]
 
-@snap[north-west span-45]
+@snap[west span-45]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -700,7 +688,7 @@ async def test_save_transaction_no_rates(pook):
 </ul>
 @snapend
 
-@snap[north-east span-45]
+@snap[east span-45]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
@@ -709,9 +697,6 @@ async def test_save_transaction_no_rates(pook):
 </ul>
 @snapend
 
-@snap[south]
-### Generic libs summary
-@snapend
 ---
 ### Cassettes
 
@@ -813,16 +798,10 @@ version: 1
 
 #### cassettes/test_save_transaction.yaml
 
-+++
-### Libraries
-
-- VCRPy
-- pytest-vcr
-
 ---
 @transition[none]
 
-@snap[north-west span-45]
+@snap[west span-45]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -832,7 +811,7 @@ version: 1
 </ul>
 @snapend
 
-@snap[north-east span-45]
+@snap[east span-45]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
@@ -1027,6 +1006,18 @@ class BigScaryClass:
 - API integrations in TDD style
 - Fake responses of external APIs
 - Refactoring of tightly-coupled code
+
+---
+### Tools
+
+- unittest.mock
+- pytest-mock
+- pytest-asyncio
+- responses
+- pytest-responses
+- pook
+- VCR-Py
+- pytest-vcr
 
 ---
 ## Thank you

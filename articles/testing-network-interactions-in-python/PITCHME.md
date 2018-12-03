@@ -845,9 +845,7 @@ version: 1
 ### Combine these approaches!
 
 ---
-### Real-life examples
-
-<img src="articles/testing-network-interactions-in-python/img/reality.jpg" alt="Reality" height="400px"/>
+## Real-life examples
 
 ---
 ### API integration

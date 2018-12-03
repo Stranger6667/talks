@@ -293,9 +293,9 @@ def to_eur(amount, currency):
     return Decimal(data["result"])
 ```
 
-@[8-11] Request to 127.0.0.1
-@[13-18] Some error handling
-@[19]
+@[4-8] Request to 127.0.0.1
+@[9-14] Some error handling
+@[15]
 +++
 ### Ad hoc tests
 
@@ -346,13 +346,15 @@ def test_save_transaction(setup_rates):
     ...
 
 def test_save_transaction_no_rates(setup_rates):
-    setup_rates(side_effect=NoExchangeRateError("No such rate"))
+    setup_rates(
+        side_effect=NoExchangeRateError("No such rate")
+    )
     ...
 ```
 
 @[1-7]
 @[9-10]
-@[13-14]
+@[13-16]
 
 +++
 ### Alternative
@@ -458,6 +460,16 @@ async def test_save_transaction_no_rates(mocker):
 @[22-23]
 @[25-28]
 @[29-33]
+
+#### pytest-asyncio
+
+---
+### Tools
+
+- unittest.mock
+- pytest-mock
+- pytest-asyncio
+
 ---
 ### Pros & cons
 
@@ -545,7 +557,7 @@ def test_save_transaction_dynamic():
 @[21-24]
 @[26]
 
-+++
+---
 ### Pros & cons
 
 Pros:
@@ -635,6 +647,13 @@ Cons:
 - Doesn't support aiohttp > 3
 
 ---
+### Tools
+
+- responses
+- pytest-responses
+- pook
+
+---
 ### Generic libs summary
 
 Pros:
@@ -649,11 +668,7 @@ Cons:
 
 <img src="articles/testing-network-interactions-in-python/img/vhs.jpg" alt="VHS" height="400px"/>
 
-+++
-### Libraries
-
-- VCRPy
-- Betamax (requests-only)
+#### vcr-py
 
 +++
 ### Example
@@ -758,6 +773,11 @@ version: 1
 - ...
 
 +++
+### Libraries
+
+- VCRPy
+- pytest-vcr
+
 ### Pros & cons
 
 Pros:
@@ -770,8 +790,7 @@ Cons:
 ---
 ### Real-life examples
 
-Note:
-Funny image
+<img src="articles/testing-network-interactions-in-python/img/reality.jpg" alt="Reality" height="400px"/>
 
 ---
 ### API integration

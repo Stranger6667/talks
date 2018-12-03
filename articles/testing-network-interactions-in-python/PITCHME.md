@@ -16,15 +16,34 @@
 @snapend
 
 @snap[west span-30]
-@box[bg-green text-white](Project intro#<ul style="list-style-type:none"><li>Code</li><li>Tests</li><li></li></ul>)
+<div id="boxed-text-box" class="bg-green text-white">
+    <div id="boxed-text-title-box">
+        <span id="boxed-text-title" style="font-size: 80%">Project intro</span>
+    </div>
+    <snap style="font-size: 70%">Code</snap><br>
+    <snap style="font-size: 70%">Tests</snap>
+</div>
 @snapend
 
 @snap[midpoint span-30]
-@box[bg-green text-white](Mocked network#<ul style="list-style-type:none"><li>Ad hoc</li><li>Generic</li><li>Cassettes</li></ul>)
+<div id="boxed-text-box" class="bg-green text-white">
+    <div id="boxed-text-title-box">
+        <span id="boxed-text-title" style="font-size: 80%">Mocked network</span>
+    </div>
+    <snap style="font-size: 70%">Ad hoc</snap><br>
+    <snap style="font-size: 70%">Generic tools</snap><br>
+    <snap style="font-size: 70%">Cassettes</snap>
+</div>
 @snapend
 
 @snap[east span-30]
-@box[bg-green text-white](Real life examples#<ul style="list-style-type:none"><li>API integration</li><li>Refactoring</li></ul>)
+<div id="boxed-text-box" class="bg-green text-white">
+    <div id="boxed-text-title-box">
+        <span id="boxed-text-title" style="font-size: 80%">Mocked network</span>
+    </div>
+    <snap style="font-size: 70%">API integration</snap><br>
+    <snap style="font-size: 70%">Refactoring</snap>
+</div>
 @snapend
 
 Note:

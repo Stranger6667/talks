@@ -466,7 +466,7 @@ async def test_save_transaction_no_rates(mocker):
 ---
 @transition[none]
 
-@snap[west span-45]
+<div class="north-west span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -474,9 +474,9 @@ async def test_save_transaction_no_rates(mocker):
     <li>Flexible</li>
     <li>Doesn't actually test API wrapper</li>
 </ul>
-@snapend
+</div>
 
-@snap[east span-45]
+<div class="north-east span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
@@ -484,7 +484,7 @@ async def test_save_transaction_no_rates(mocker):
     <li>Becomes messy fast</li>
     <li>Doesn't actually test API wrapper</li>
 </ul>
-@snapend
+</div>
 
 Note:
 These kind of tests are good if you can afford saying - I don't care what this part does internally, 
@@ -564,23 +564,23 @@ def test_save_transaction_dynamic():
 ---
 @transition[none]
 
-@snap[west span-45]
+<div class="north-west span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
     <li>Feature-rich</li>
     <li>Well-supported</li>
 </ul>
-@snapend
+</div>
 
-@snap[east span-45]
+<div class="north-east span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
 <ul>
     <li>Requests - only</li>
 </ul>
-@snapend
+</div>
 
 ---
 ### Universal solution
@@ -656,46 +656,48 @@ async def test_save_transaction_no_rates(pook):
 ---
 @transition[none]
 
-@snap[west span-45]
+<div class="north-west span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
     <li>Feature-rich</li>
     <li>Works with requests, urllib3, urllib, http-client, aiohttp</li>
 </ul>
-@snapend
+</div>
 
-@snap[east span-45]
+<div class="north-east span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
 <ul>
     <li>Doesn't support aiohttp > 3</li>
 </ul>
-@snapend
+</div>
 
 ---
+@snap[north]
 ### Generic libs summary
+@snapend
 
 @transition[none]
 
-@snap[west span-45]
+<div class="north-west span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
     <li>Convenient API for certain use-cases</li>
     <li>Multiple requests</li>
 </ul>
-@snapend
+</div>
 
-@snap[east span-45]
+<div class="north-east span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
 <ul>
     <li>Sometimes requires more manual work</li>
 </ul>
-@snapend
+</div>
 
 ---
 ### Cassettes
@@ -801,7 +803,7 @@ version: 1
 ---
 @transition[none]
 
-@snap[west span-45]
+<div class="north-west span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 <br>
 <ul>
@@ -809,16 +811,16 @@ version: 1
     <li>Supports many http clients</li>
     <li>Multiple requests</li>
 </ul>
-@snapend
+</div>
 
-@snap[east span-45]
+<div class="north-east span-45" style="padding-top: 150px;">
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
 <br>
 <ul>
     <li>No network exceptions emulation</li>
 </ul>
-@snapend
+</div>
 
 ---
 ### Combine these approaches!

@@ -565,8 +565,8 @@ def test_save_transaction_dynamic():
 @[5-6]
 @[7-11]
 @[12-19]
-@[21-24]
-@[26]
+@[21-25]
+@[27]
 
 ---
 @transition[none]
@@ -577,7 +577,6 @@ def test_save_transaction_dynamic():
 <ul>
     <li>Feature-rich</li>
     <li>Well-supported</li>
-    <li>Doesn't actually test API wrapper</li>
 </ul>
 @snapend
 
@@ -591,9 +590,7 @@ def test_save_transaction_dynamic():
 @snapend
 
 ---
-### Sync and async
-
-#### Pook
+### Universal solution
 
 ```python
 @pytest.fixture
@@ -605,6 +602,9 @@ def pook():
     yield pook
     pook.off()
 ```
+
+#### Pook
+
 +++
 ### Sync examples
 
@@ -689,7 +689,6 @@ async def test_save_transaction_no_rates(pook):
 - pook
 
 ---
-### Generic libs summary
 @transition[none]
 
 @snap[north-west span-45]
@@ -710,6 +709,9 @@ async def test_save_transaction_no_rates(pook):
 </ul>
 @snapend
 
+@snap[south]
+### Generic libs summary
+@snapend
 ---
 ### Cassettes
 

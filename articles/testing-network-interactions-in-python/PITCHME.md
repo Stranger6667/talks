@@ -117,6 +117,10 @@ class ExchangeRate(db.Model):
     ratio = db.Column(db.Numeric, nullable=False)
 ```
 
+@[1-3]
+@[6-16]
+@[19-23]
+
 +++
 ### Code
 #### Application
@@ -126,7 +130,8 @@ from flask import Flask
 
 def create_app():
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://127.0.0.1:5432/test"
+    db_uri = "postgresql://127.0.0.1:5432/test"
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     from .models import db
@@ -136,8 +141,8 @@ def create_app():
     return app
 ```
 
-@[4-6]
-@[8-10]
+@[4-7]
+@[9-11]
 
 +++
 ### Code
@@ -159,8 +164,9 @@ def save_transaction(booking_id: int, amount: Decimal, currency: str):
     return transaction
 ```
 
-@[7]
-@[9-11]
+@[8]
+@[10-12]
+@[13]
 
 +++
 ### Code
@@ -182,7 +188,8 @@ def to_eur(amount: Decimal, currency: str):
     return rate.ratio * amount
 ```
 
-@[6-13]
+@[8-9]
+@[10-13]
 
 +++
 ### Code
@@ -208,6 +215,7 @@ class ExchangeRateFactory(SQLAlchemyModelFactory):
     ratio = Faker("pydecimal", positive=True)
 ```
 
+@[9-17]
 +++
 ### Code
 ##### conftest.py
@@ -223,13 +231,11 @@ from . import factories
 
 register(factories.ExchangeRateFactory)
 
-
 @pytest.fixture
 def app():
     app = create_app()
     with app.app_context():
         yield app
-
 
 @pytest.fixture
 def database(app):
@@ -238,6 +244,10 @@ def database(app):
     db.session.commit()
     db.drop_all()
 ```
+
+@[7-9] Factories registration
+@[11-15] App fixture
+@[17-22] DB fixture
 
 +++
 ### Code
@@ -262,6 +272,9 @@ def test_save_transaction_no_rates():
     with pytest.raises(NoExchangeRateError, message="No such rate"):
         save_transaction(1, Decimal(10), "NOK")
 ```
+
+@[10-13]
+@[15-17]
 
 ---
 ## Cutting out
@@ -290,9 +303,13 @@ def to_eur(amount: Decimal, currency: str):
     return Decimal(data["result"])
 ```
 
+@[8] Request to 127.0.0.1
+@[10-15] Some error handling
+@[16]
 +++
 ### Ad hoc tests
 
+<img src="articles/testing-network-interactions-in-python/img/pretend-doesnt-exist.jpeg" alt="Pretend" height="400px"/>
 Note:
 Picture - pretend that the code doesn't exist
 

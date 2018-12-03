@@ -62,11 +62,9 @@ Note:
 ---
 ### Case study
 
-#### Monolithic app
-
 <img src="articles/testing-network-interactions-in-python/img/monolith.jpg" alt="Monolith" height="400px"/>
 
-##### Flights booking
+##### Monolithic app for flights booking
 
 Note:
 Split monolith picture.

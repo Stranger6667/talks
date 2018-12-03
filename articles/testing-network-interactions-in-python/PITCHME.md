@@ -64,7 +64,7 @@ Note:
 
 #### Monolithic app
 
-<img src="testing-network-interactions-in-python/img/monolith.jpg" alt="Monolith" width="600px"/>
+<img src="articles/testing-network-interactions-in-python/img/monolith.jpg" alt="Monolith" width="600px"/>
 
 ##### Flights booking
 

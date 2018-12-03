@@ -479,7 +479,7 @@ async def test_save_transaction_no_rates(mocker):
 <ul>
     <li>Easy to setup</li>
     <li>Flexible</li>
-    <li>Doesn't actually test <br> API wrapper</li>
+    <li>Doesn't actually test API wrapper</li>
 </ul>
 @snapend
 
@@ -488,8 +488,8 @@ async def test_save_transaction_no_rates(mocker):
 
 <br>
 <ul>
-    <li>Becomes messy very fast</li>
-    <li>Doesn't actually test <br> API wrapper</li>
+    <li>Becomes messy fast</li>
+    <li>Doesn't actually test API wrapper</li>
 </ul>
 @snapend
 

@@ -471,7 +471,15 @@ async def test_save_transaction_no_rates(mocker):
 - pytest-asyncio
 
 ---
-### Pros & cons
+@transition[none]
+
+@snap[north-west]
+<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" height="100px"/>
+@snapend
+
+@snap[north-east]
+<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" height="100px"/>
+@snapend
 
 ##### Pros:
 - Easy to setup

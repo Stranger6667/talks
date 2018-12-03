@@ -635,9 +635,7 @@ Cons:
 ---
 ### Cassettes
 
-Notes:
-Description.
-Cassette picture
+<img src="articles/testing-network-interactions-in-python/img/vhs.jpg" alt="VHS" height="400px"/>
 
 +++
 ### Libraries

@@ -666,6 +666,49 @@ def test_save_transaction_no_rates():
         save_transaction(1, Decimal(10), "NOK")
 ```
 +++
+### Actual microservice
+
+```python
+from decimal import Decimal
+
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+RATES = {
+    "CZK": Decimal("25.5")
+}
+
+def convert(amount, currency):
+    try:
+        rate = RATES[currency]
+        return format(amount / rate, ".2f")
+    except KeyError:
+        raise NoExchangeRateError
+
+@app.route("/to_eur")
+def to_eur():
+    currency = request.args["currency"]
+    amount = request.args["amount"]
+    return jsonify({"result": convert(amount, currency)})
+
+class NoExchangeRateError(Exception):
+    status_code = 400
+
+@app.errorhandler(NoExchangeRateError)
+def handle_no_rate(error):
+    response = jsonify({"detail": "No such rate"})
+    response.status_code = error.status_code
+    return response
+```
+
+@[1-5] Flask app
+@[7-9] Sample rates
+@[11-16] Rate conversion
+@[17-21] App route
+@[23-30] Error handling
+ 
++++
 ### Cassette
 
 ```yaml
@@ -673,19 +716,13 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: ['*/*']
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      User-Agent: [python-requests/2.20.1]
+      ...
     method: GET
     uri: http://127.0.0.1:5000/to_eur?amount=10&currency=CZK
   response:
     body: {string: '{"result":"100.0"}'}
     headers:
-      Content-Length: ['19']
-      Content-Type: [application/json]
-      Date: ['Sun, 02 Dec 2018 12:21:47 GMT']
-      Server: [Werkzeug/0.14.1 Python/3.7.0]
+      ...
     status: {code: 200, message: OK}
 version: 1
 ```
@@ -780,17 +817,13 @@ class MasterCardAPIClient:
             E.CreatePurchaseRequest(
                 Amount=amount,
                 CurrencyCode=currency,
-                PurchaseType=...,
-                SupplierName=...,
-                ValidFor=...,
+                ...
             ),
-            E.ApprovePurchaseRequest(),
-            E.GetCPNDetailsRequest(),
+            ...
         )
         return {
             ...
         }
-
 ```
 
 +++

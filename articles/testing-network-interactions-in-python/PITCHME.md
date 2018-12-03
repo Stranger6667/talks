@@ -569,13 +569,26 @@ def test_save_transaction_dynamic():
 @[26]
 
 ---
-### Pros & cons
+@transition[none]
 
-Pros:
-- Feature-rich
+@snap[north-west span-45]
+<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
+<br>
+<ul>
+    <li>Feature-rich</li>
+    <li>Well-supported</li>
+    <li>Doesn't actually test API wrapper</li>
+</ul>
+@snapend
 
-Cons:
-- Requests only
+@snap[north-east span-45]
+<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
+
+<br>
+<ul>
+    <li>Requests - only</li>
+</ul>
+@snapend
 
 ---
 ### Sync and async
@@ -647,15 +660,26 @@ async def test_save_transaction_no_rates(pook):
 @[8-12]
 @[15-19]
 
-+++
-### Pros & cons
+---
+@transition[none]
 
-Pros:
-- Works for requests, urllib3, urllib, http-client, aiohttp
-- Feature-rich
+@snap[north-west span-45]
+<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
+<br>
+<ul>
+    <li>Feature-rich</li>
+    <li>Works with requests, urllib3, urllib, http-client, aiohttp</li>
+</ul>
+@snapend
 
-Cons:
-- Doesn't support aiohttp > 3
+@snap[north-east span-45]
+<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
+
+<br>
+<ul>
+    <li>Doesn't support aiohttp > 3</li>
+</ul>
+@snapend
 
 ---
 ### Tools
@@ -666,13 +690,25 @@ Cons:
 
 ---
 ### Generic libs summary
+@transition[none]
 
-Pros:
-- Convenient API for certain use-cases
-- Multiple requests
+@snap[north-west span-45]
+<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
+<br>
+<ul>
+    <li>Convenient API for certain use-cases</li>
+    <li>Multiple requests</li>
+</ul>
+@snapend
 
-Cons:
-- Sometimes requires more manual work
+@snap[north-east span-45]
+<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
+
+<br>
+<ul>
+    <li>Sometimes requires more manual work</li>
+</ul>
+@snapend
 
 ---
 ### Cassettes
@@ -789,14 +825,27 @@ version: 1
 - VCRPy
 - pytest-vcr
 
-### Pros & cons
+---
+@transition[none]
 
-Pros:
-- Easy to use
-- Supports many http clients
+@snap[north-west span-45]
+<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
+<br>
+<ul>
+    <li>Easy to use</li>
+    <li>Supports many http clients</li>
+    <li>Multiple requests</li>
+</ul>
+@snapend
 
-Cons:
-- No network exceptions emulation
+@snap[north-east span-45]
+<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
+
+<br>
+<ul>
+    <li>No network exceptions emulation</li>
+</ul>
+@snapend
 
 ---
 ### Real-life examples
@@ -983,4 +1032,7 @@ class BigScaryClass:
 - Refactoring of tightly-coupled code
 
 ---
-### Thank you
+## Thank you
+
+- https://github.com/Stranger6667
+- https://twitter.com/Stranger6667

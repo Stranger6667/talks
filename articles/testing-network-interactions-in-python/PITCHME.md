@@ -474,21 +474,19 @@ async def test_save_transaction_no_rates(mocker):
 @transition[none]
 
 @snap[north-west]
-<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" height="100px"/>
-@snapend
+<img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
 
-@snap[north-east]
-<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" height="100px"/>
-@snapend
-
-##### Pros:
 - Easy to setup
 - Flexible
 - Doesn't actually test API wrapper
+@snapend
 
-##### Cons:
+@snap[north-east]
+<img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
+
 - Becomes messy very fast
 - Doesn't actually test API wrapper
+@snapend
 
 Note:
 These kind of tests are good if you can afford saying - I don't care what this part does internally, 

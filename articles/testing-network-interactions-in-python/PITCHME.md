@@ -475,17 +475,22 @@ async def test_save_transaction_no_rates(mocker):
 
 @snap[north-west]
 <img src="articles/testing-network-interactions-in-python/img/pros.png" alt="Pros" width="130px" height="130px"/>
-
-- Easy to setup
-- Flexible
-- Doesn't actually test API wrapper
+<br>
+<ul>
+    <li>Easy to setup</li>
+    <li>Flexible</li>
+    <li>Doesn't actually test <br> API wrapper</li>
+</ul>
 @snapend
 
 @snap[north-east]
 <img src="articles/testing-network-interactions-in-python/img/cons.png" alt="Cons" width="130px" height="130px"/>
 
-- Becomes messy very fast
-- Doesn't actually test API wrapper
+<br>
+<ul>
+    <li>Becomes messy very fast</li>
+    <li>Doesn't actually test <br> API wrapper</li>
+</ul>
 @snapend
 
 Note:

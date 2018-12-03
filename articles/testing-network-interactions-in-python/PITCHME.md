@@ -66,17 +66,12 @@ Note:
 
 ##### Monolithic app for flights booking
 
-Note:
-Split monolith picture.
-Big Crate or something
-
 +++
 ### Case study
 
 #### Microservices 
 
-Note:
-Small containers picture
+<img src="articles/testing-network-interactions-in-python/img/microservices.png" alt="Microservices" height="400px"/>
 
 +++
 ### Case study

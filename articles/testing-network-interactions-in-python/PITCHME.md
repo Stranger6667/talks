@@ -1021,7 +1021,7 @@ class BigScaryClass:
 - You actually have tests
 
 ---
-## How you could these approaches?
+### How you could use these approaches?
 
 - Splitting monolithic apps
 - API integrations in TDD style

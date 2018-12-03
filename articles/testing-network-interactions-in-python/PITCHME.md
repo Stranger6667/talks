@@ -67,33 +67,25 @@ Note:
 ##### Monolithic app for flights booking
 
 +++
-### Case study
-
-#### Microservices 
+### Case study 
 
 <img src="articles/testing-network-interactions-in-python/img/microservices.png" alt="Microservices" height="400px"/>
 
+##### Microservices
+
 +++
 ### Case study
 
-#### Looking for a good candidate
+<img src="articles/testing-network-interactions-in-python/img/structure.png" alt="Structure" height="400px"/>
 
-Note:
-App structure, file tree screenshot with marked exchanges 
+##### Looking for a good candidate
+
 +++
 ### Case study
 
-#### Exchange rates
+<img src="articles/testing-network-interactions-in-python/img/new_structure.png" alt="New structure" height="400px"/>
 
-Note:
-Pic for exchange rates
-+++
-### Case study
-
-#### Interact over network
-
-Note:
-Schema for new approach
+##### Interact over network
 
 ---
 ### Code

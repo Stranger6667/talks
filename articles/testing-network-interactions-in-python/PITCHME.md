@@ -149,47 +149,50 @@ def create_app():
 #### Payments
 
 ```python
-from decimal import Decimal
-
 from . import exchange
 from .models import db, Transaction
 
-def save_transaction(booking_id: int, amount: Decimal, currency: str):
+def save_transaction(booking_id, amount, currency):
     """We need to store EUR amount as well."""
     amount_eur = exchange.to_eur(amount, currency)
 
-    transaction = Transaction(booking_id=booking_id, amount=amount, currency=currency, amount_eur=amount_eur)
+    transaction = Transaction(
+        booking_id=booking_id, 
+        amount=amount, 
+        currency=currency, 
+        amount_eur=amount_eur
+    )
     db.session.add(transaction)
     db.session.commit()
     return transaction
 ```
 
-@[8]
-@[10-12]
-@[13]
+@[6]
+@[8-15]
+@[16]
 
 +++
 ### Code
 #### Exchange
 
 ```python
-from decimal import Decimal
-
 from .exceptions import NoExchangeRateError
 from .models import ExchangeRate
 
-def to_eur(amount: Decimal, currency: str):
+def to_eur(amount, currency):
     """Convert to EUR."""
     if currency == "EUR":
         return amount
-    rate = ExchangeRate.query.filter_by(currency=currency).one_or_none()
+    rate = ExchangeRate.query.filter_by(
+        currency=currency
+    ).one_or_none()
     if not rate:
         raise NoExchangeRateError("No such rate")
     return rate.ratio * amount
 ```
 
-@[8-9]
-@[10-13]
+@[6-7]
+@[8-13]
 
 +++
 ### Code
@@ -197,13 +200,7 @@ def to_eur(amount: Decimal, currency: str):
 ##### factories.py
 
 ```python
-from factory import Faker
-from factory.alchemy import SQLAlchemyModelFactory
-
-from booking import models
-
-session = models.db.create_scoped_session()
-
+...
 
 class ExchangeRateFactory(SQLAlchemyModelFactory):
     class Meta:
@@ -215,17 +212,13 @@ class ExchangeRateFactory(SQLAlchemyModelFactory):
     ratio = Faker("pydecimal", positive=True)
 ```
 
-@[9-17]
+@[3-10]
 +++
 ### Code
 ##### conftest.py
 
 ```python
-import pytest
-from pytest_factoryboy import register
-
-from booking.app import create_app
-from booking.models import db
+...
 
 from . import factories
 
@@ -245,21 +238,16 @@ def database(app):
     db.drop_all()
 ```
 
-@[7-9] Factories registration
-@[11-15] App fixture
-@[17-22] DB fixture
+@[3-5] Factories registration
+@[7-11] App fixture
+@[13-18] DB fixture
 
 +++
 ### Code
 ##### test_payments.py
 
 ```python
-from decimal import Decimal
-
-import pytest
-
-from booking.exceptions import NoExchangeRateError
-from booking.payments import save_transaction
+...
 
 pytestmark = [pytest.mark.usefixtures("database")]
 
@@ -269,12 +257,15 @@ def test_save_transaction(exchange_rate_factory):
     assert transaction.amount_eur == Decimal(255)
 
 def test_save_transaction_no_rates():
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
+    with pytest.raises(
+        NoExchangeRateError, 
+        message="No such rate"
+    ):
         save_transaction(1, Decimal(10), "NOK")
 ```
 
-@[10-13]
-@[15-17]
+@[5-8]
+@[10-15]
 
 ---
 ## Cutting out
@@ -285,14 +276,13 @@ def test_save_transaction_no_rates():
 ### New exchange code (sync)
 
 ```python
-from decimal import Decimal
+...
 
-import requests
-
-from .exceptions import NoExchangeRateError
-
-def to_eur(amount: Decimal, currency: str):
-    response = requests.get("http://127.0.0.1:5000/to_eur", params={"amount": amount, "currency": currency})
+def to_eur(amount, currency):
+    response = requests.get(
+        "http://127.0.0.1:5000/to_eur", 
+        params={"amount": amount, "currency": currency}
+    )
     data = response.json()
     try:
         response.raise_for_status()
@@ -303,41 +293,41 @@ def to_eur(amount: Decimal, currency: str):
     return Decimal(data["result"])
 ```
 
-@[8] Request to 127.0.0.1
-@[10-15] Some error handling
-@[16]
+@[8-11] Request to 127.0.0.1
+@[13-18] Some error handling
+@[19]
 +++
 ### Ad hoc tests
 
 <img src="articles/testing-network-interactions-in-python/img/pretend-doesnt-exist.jpeg" alt="Pretend" height="400px"/>
-Note:
-Picture - pretend that the code doesn't exist
+
+##### Let's pretend that the new code doesn't exist
 
 +++
 ### Ad hoc tests
 
-##### pytest-mock
-
 ```python
-from decimal import Decimal
-
-import pytest
-
-from booking.exceptions import NoExchangeRateError
-from booking.sync.payments import save_transaction
-
-pytestmark = [pytest.mark.usefixtures("database")]
+...
 
 def test_save_transaction(mocker):
-    mocker.patch("booking.sync.exchange.to_eur", return_value=Decimal(255))
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
+    mocker.patch(
+        "booking.sync.exchange.to_eur", 
+        return_value=Decimal(255)
+    )
+    ...
 
 def test_save_transaction_no_rates(mocker):
-    mocker.patch("booking.sync.exchange.to_eur", side_effect=NoExchangeRateError("No such rate"))
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "NOK")
+    mocker.patch(
+        "booking.sync.exchange.to_eur", 
+        side_effect=NoExchangeRateError("No such rate")
+    )
+    ...
 ```
+
+@[4-7]
+@[11-14]
+
+##### pytest-mock
 
 +++
 ### More configurable approach
@@ -351,18 +341,18 @@ def setup_rates(mocker):
 
     return inner
 
-
 def test_save_transaction(setup_rates):
     setup_rates(return_value=Decimal(255))
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
-
+    ...
 
 def test_save_transaction_no_rates(setup_rates):
     setup_rates(side_effect=NoExchangeRateError("No such rate"))
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "NOK")
+    ...
 ```
+
+@[1-7]
+@[9-10]
+@[13-14]
 
 +++
 ### Alternative
@@ -376,24 +366,23 @@ def setup(request, mocker):
 
 @pytest.mark.setup_rates(return_value=Decimal(255))
 def test_save_transaction():
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
+    ...
 ```
+
+@[1-5]
+@[7-8]
 
 ---
 ### Async version with aiohttp
 
 ```python
-from decimal import Decimal
+...
 
-import aiohttp
-
-from .exceptions import NoExchangeRateError
-
-async def to_eur(amount: Decimal, currency: str):
+async def to_eur(amount, currency):
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            "http://127.0.0.1:5000/to_eur", params={"amount": amount, "currency": currency}
+            "http://127.0.0.1:5000/to_eur", 
+            params={"amount": amount, "currency": currency}
         ) as response:
             data = await response.json()
             try:
@@ -404,44 +393,71 @@ async def to_eur(amount: Decimal, currency: str):
                 raise
             return Decimal(data["result"])
 ```
+
+@[3-8]
+@[9-16]
 +++
 ### Async payments
 
 ```python
 from . import exchange
 
-async def save_transaction(booking_id: int, amount: Decimal, currency: str):
+async def save_transaction(booking_id, amount, currency):
     """We need to store EUR amount as well."""
     amount_eur = await exchange.to_eur(amount, currency)
 
     ...
 ```
+
+@[3-5]
+
 +++
 ### Ad hoc tests
 
 ```python
-pytestmark = [pytest.mark.usefixtures("database"), pytest.mark.asyncio]
+...
 
+pytestmark = [
+    pytest.mark.usefixtures("database"), 
+    pytest.mark.asyncio
+]
 
 async def test_save_transaction(mocker):
     async def coro():
         return Decimal(255)
 
-    mocker.patch("booking.aio.exchange.to_eur", return_value=coro())
-    transaction = await save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
-
+    mocker.patch(
+        "booking.aio.exchange.to_eur", 
+        return_value=coro()
+    )
+    transaction = await save_transaction(
+        1, Decimal(10), "CZK"
+    )
+    assert transaction.amount_eur == Decimal(255)
 
 async def test_save_transaction_no_rates(mocker):
     async def coro():
         raise NoExchangeRateError("No such rate")
 
-    mocker.patch("booking.aio.exchange.to_eur", return_value=coro())
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
+    mocker.patch(
+        "booking.aio.exchange.to_eur", 
+        return_value=coro()
+    )
+    with pytest.raises(
+        NoExchangeRateError, 
+        message="No such rate"
+    ):
         await save_transaction(1, Decimal(10), "NOK")
-
 ```
 
+@[3-6]
+@[8]
+@[9-10]
+@[12-15]
+@[16-19]
+@[22-23]
+@[25-28]
+@[29-33]
 ---
 ### Pros & cons
 
@@ -463,13 +479,16 @@ But usually you can't afford yourself this level of confidence in the code
 ---
 ### Generic libs
 
-#### Responses
+#### Responses + pytest
 
 ```python
 def test_save_transaction(responses):
-    responses.add(responses.GET, "http://127.0.0.1:5000/to_eur", body='{"result": "255"}')
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
+    responses.add(
+        responses.GET, 
+        "http://127.0.0.1:5000/to_eur", 
+        body='{"result": "255"}'
+    )
+    ...
 ```
 
 +++
@@ -477,15 +496,19 @@ def test_save_transaction(responses):
 
 ```python
 def test_save_transaction_exception(responses):
-    responses.add(responses.GET, "http://127.0.0.1:5000/to_eur", body=requests.ConnectionError("Error"))
-    with pytest.raises(requests.ConnectionError, message="Error"):
-        save_transaction(1, Decimal(10), "NOK")
+    responses.add(
+        responses.GET, 
+        "http://127.0.0.1:5000/to_eur", 
+        body=requests.ConnectionError("Error")
+    )
+    ...
 ```
 
 +++
 ### Dynamic responses
 
 ```python
+...
 
 @pytest.fixture
 def setup_rates(responses):
@@ -504,7 +527,11 @@ def setup_rates(responses):
             status = 400
         return status, {}, json.dumps(result)
 
-    responses.add_callback(responses.GET, "http://127.0.0.1:5000/to_eur", callback=request_callback)
+    responses.add_callback(
+        responses.GET, 
+        "http://127.0.0.1:5000/to_eur", 
+        callback=request_callback
+    )
 
 
 @pytest.mark.usefixtures("setup_rates")
@@ -543,14 +570,19 @@ def pook():
 pytestmark = [pytest.mark.usefixtures("database")]
 
 def test_save_transaction(pook):
-    pook.get("http://127.0.0.1:5000/to_eur", response_json={"result": 255})
-    transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
+    pook.get(
+        "http://127.0.0.1:5000/to_eur", 
+        response_json={"result": 255}
+    )
+    ...
 
 def test_save_transaction_no_rates(pook):
-    pook.get("http://127.0.0.1:5000/to_eur", response_json={"detail": "No such rate"}, response_status=400)
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
-        save_transaction(1, Decimal(10), "NOK")
+    pook.get(
+        "http://127.0.0.1:5000/to_eur", 
+        response_json={"detail": "No such rate"}, 
+        response_status=400
+    )
+    ...
 ```
 
 +++
@@ -558,18 +590,26 @@ def test_save_transaction_no_rates(pook):
 
 ```python
 
-pytestmark = [pytest.mark.usefixtures("database"), pytest.mark.asyncio]
+pytestmark = [
+    pytest.mark.usefixtures("database"), 
+    pytest.mark.asyncio
+]
 
 async def test_save_transaction(pook):
-    pook.get("http://127.0.0.1:5000/to_eur", response_json={"result": 255})
-    transaction = await save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
+    pook.get(
+        "http://127.0.0.1:5000/to_eur", 
+        response_json={"result": 255}
+    )
+    ...
 
 
 async def test_save_transaction_no_rates(pook):
-    pook.get("http://127.0.0.1:5000/to_eur", response_json={"detail": "No such rate"}, response_status=400)
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
-        await save_transaction(1, Decimal(10), "NOK")
+    pook.get(
+        "http://127.0.0.1:5000/to_eur", 
+        response_json={"detail": "No such rate"}, 
+        response_status=400
+    )
+    ...
 ```
 
 +++
@@ -609,18 +649,23 @@ Cassette picture
 ### Example
 
 ```python
-pytestmark = [pytest.mark.usefixtures("database"), pytest.mark.vcr]
+pytestmark = [
+    pytest.mark.usefixtures("database"), 
+    pytest.mark.vcr
+]
 
 
 def test_save_transaction():
     transaction = save_transaction(1, Decimal(10), "CZK")
-    assert transaction.amount_eur == 255
+    assert transaction.amount_eur == Decimal(255)
 
 
 def test_save_transaction_no_rates():
-    with pytest.raises(NoExchangeRateError, message="No such rate"):
+    with pytest.raises(
+        NoExchangeRateError, 
+        message="No such rate"
+    ):
         save_transaction(1, Decimal(10), "NOK")
-
 ```
 +++
 ### Cassette
@@ -712,7 +757,7 @@ class MasterCardAPIClient:
     ...
 
     def build_payload(self, *commands):
-        """Build an XML payload for a request to MasterCard API."""
+        """Build an XML payload for MasterCard API."""
         payload = ...
         return payload
 
@@ -720,7 +765,11 @@ class MasterCardAPIClient:
         """Make a call to MasterCard API."""
         payload = self.build_payload(*commands)
         response = await xml_request(
-            "POST", url=self.url, data=payload, verify_ssl=self.verify_ssl, cert=self.request_pem
+            "POST", 
+            url=self.url, 
+            data=payload, 
+            verify_ssl=self.verify_ssl, 
+            cert=self.request_pem
         )
         parsed = etree.fromstring(response._body)
         error = parsed.find("Error")
@@ -728,7 +777,7 @@ class MasterCardAPIClient:
             raise MasterCardAPIError(error)
         return parsed
 
-    async def create_card(self, amount: str, currency: str):
+    async def create_card(self, amount, currency):
         response = await self._call(
             E.CreatePurchaseRequest(
                 Amount=amount,
@@ -768,6 +817,25 @@ class MasterCardAPIClient:
 ### Refactoring use case
 
 ```python
+class BigScaryClass(object):
+
+    def __init__(self, *args, **kwargs):
+        # Few dozens of different attributes 
+        # including mutable ones
+        ...  
+
+    def load_data(self):
+        # Calls to external APIs
+        # DB queries
+        # Storing everything in instance attributes 
+        ...
+```
+
+##### Code sample
++++
+### Refactoring use case
+
+```python
 @pytest.mark.vcr()
 def test_ancillaries_core():
     core = BigScaryClass("123", "test_service", "test", None)
@@ -779,10 +847,27 @@ def test_ancillaries_core():
 ```
 
 +++
+### Refactoring use case
+
+```python
+@attr.s
+class BigScaryClass:
+    # Define only static attributes that are really needed
+    ...
+
+    def load_data(self):
+        # Calls separate functions, 
+        # that produce the same effects that the old code 
+        # Storing only needed in instance attributes
+        # Most of the new code is stateless 
+        ...
+```
+
++++
 ### Process
 
 - Choose code that you could run on production harmlessly
-- Record all network interactions
+- Record all network interactions for different cases
 - Add detailed assertions
 - Refactor and add new tests for refactored code
 - Repeat until you're happy with new code

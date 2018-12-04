@@ -51,20 +51,15 @@ Note:
 - in progress (no real need for an external service)
 
 ---
-### Stack
-
-- Python 3.7
-- Flask + connexion
-- SQLAlchemy
-- PostgreSQL
-- Pytest
-
----
 ### Case study
 
 <img src="articles/testing-network-interactions-in-python/img/monolith.jpg" alt="Monolith" height="400px"/>
 
 ##### Monolithic app for flights booking
+
+Note:
+Lets imagine that we built an application for flights booking a couple of years ago.
+And after some time it became big, ugly and unmaintainable.
 
 +++
 ### Case study 
@@ -73,12 +68,20 @@ Note:
 
 ##### Microservices
 
+Note:
+No talk about microservices can go without a container ship image. Right?
+Usual way to go nowdays.
+
 +++
 ### Case study
 
 <img src="articles/testing-network-interactions-in-python/img/structure.png" alt="Structure" height="400px"/>
 
 ##### Looking for a good candidate
+
+Note:
+So, we start searching for a good piece of code that we can cut out as a microservice.
+And we found one - exchange rates. They are quite independent 
 
 +++
 ### Case study
@@ -87,7 +90,21 @@ Note:
 
 ##### Interact over network
 
+Note:
+Our new approach could look like this. The booking app will interact with the exchange rates app over network. 
+It is amazing, isn't it?
+Lets inspect the code we have so far.
+
 ---
+### Stack
+
+- Python 3.7
+- Flask + connexion
+- SQLAlchemy
+- PostgreSQL
+- Pytest
+
++++
 @snap[north]
 ### Code
 @snapend
@@ -124,6 +141,10 @@ class ExchangeRate(db.Model):
 
 #### Models
 
+Note:
+We have two models, transaction and the exchange rate.
+They are kind of straightforward.
+
 +++
 @snap[north]
 ### Code
@@ -149,6 +170,10 @@ def create_app():
 @[9-11]
 
 #### Application
+
+Note:
+Classic flask application factory.
+I omit some configuration loading code here to have a smaller example.
 
 +++
 @snap[north]
@@ -180,6 +205,10 @@ def save_transaction(booking_id, amount, currency):
 
 #### Payments
 
+Note:
+The only place we use exchange rate is the payment module.
+We need to store payment transaction amount in EUR as well as in original currency.
+
 +++
 @snap[north]
 ### Code
@@ -208,7 +237,7 @@ def to_eur(amount, currency):
 
 +++
 @snap[north]
-### Code
+### Tests
 @snapend
 
 ```python
@@ -228,7 +257,7 @@ class ExchangeRateFactory(SQLAlchemyModelFactory):
 
 +++
 @snap[north]
-### Code
+### Tests
 @snapend
 
 ```python
@@ -258,9 +287,13 @@ def database(app):
 
 ##### conftest.py
 
+Note:
+We will not care about wrapping tests in transactions,
+let's just drop everything for every test
+
 +++
 @snap[north]
-### Code
+### Tests
 @snapend
 
 ```python
@@ -293,6 +326,9 @@ def test_save_transaction_no_rates():
 
 <img src="articles/testing-network-interactions-in-python/img/cake-cut.jpg" alt="Cutting out" height="400px"/>
 
+Note:
+Ok, lets cut this lovely application.
+
 ---
 @snap[north]
 ### New exchange code (sync)
@@ -319,6 +355,10 @@ def to_eur(amount, currency):
 @[4-8] Request to 127.0.0.1
 @[9-14] Some error handling
 @[15]
+
+Note:
+Our exchange rates service will work on localhost for a while.
+And use requests to get the data.
 
 +++
 @snap[north]
@@ -440,6 +480,9 @@ async def to_eur(amount, currency):
 @[3-8]
 @[9-16]
 
+Note:
+But what if we want to be async? No problem, lets use aiohttp.
+
 +++
 @snap[north]
 ### Async payments
@@ -456,6 +499,10 @@ async def save_transaction(booking_id, amount, currency):
 ```
 
 @[3-5]
+
+Note:
+We need to adapt other code in some way.
+Again, let's pretend that we work with the DB in async way as well.
 
 +++
 @snap[north]
@@ -532,8 +579,9 @@ async def test_save_transaction_no_rates(mocker):
 </div>
 
 Note:
-These kind of tests are good if you can afford saying - I don't care what this part does internally, 
+These kind of tests are good if you can afford saying - I don't care what this code part does internally, 
 I just assume that it should return this data in this situation.
+I only check if other code works if this part will provide this interface.
 It could work for small and simple parts from time to time or it could work as a temporary solution.
 But usually you can't afford yourself this level of confidence in the code
 
@@ -730,6 +778,16 @@ async def test_save_transaction_no_rates(pook):
 @[15-19]
 
 +++
+@snap[north]
+### More features
+@snapend
+
+- Regex matching of headers, querystring, path, body, etc
+- Response delay (aiohttp only)
+- Callbacks
+- Many more!
+
++++
 @transition[none]
 
 <div class="north-west span-45" style="padding-top: 150px;">
@@ -894,6 +952,29 @@ version: 1
 @[8-12]
 
 #### cassettes/test_save_transaction.yaml
+
++++
+@snap[north]
+### Record modes
+@snapend
+
+@ul
+- **`all`**
+- **`once`**
+- **`none`**
+@ulend
+
++++
+@snap[north]
+### Secrets filters
+@snapend
+
+@ul
+- **Headers**
+- **Querystring**
+- **POST data**
+- **Custom filters**
+@ulend
 
 +++
 @transition[none]
@@ -1126,7 +1207,7 @@ class BigScaryClass:
 
 ---
 @snap[north]
-### Tools
+### Tools & repos
 @snapend
 
 @ul
@@ -1156,6 +1237,13 @@ class BigScaryClass:
 - pytest-vcr https://github.com/ktosiek/pytest-vcr
 - betamax 
 @ulend
+
++++
+@snap[north]
+### Example repo
+@snapend
+
+https://github.com/Stranger6667/testing-network
 
 ---
 ## Thank you

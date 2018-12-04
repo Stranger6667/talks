@@ -1208,12 +1208,12 @@ class BigScaryClass:
 ### Tools & repos
 @snapend
 
-- unittest.mock
-- pytest-mock 
+#### unittest.mock
+#### pytest-mock 
 
 https://github.com/pytest-dev/pytest-mock
 
-- pytest-asyncio 
+#### pytest-asyncio 
 
 https://github.com/pytest-dev/pytest-asyncio
 
@@ -1222,15 +1222,15 @@ https://github.com/pytest-dev/pytest-asyncio
 ### Tools & repos
 @snapend
 
-- responses 
+#### responses 
 
 https://github.com/getsentry/responses
 
-- pytest-responses 
+#### pytest-responses 
 
 https://github.com/getsentry/pytest-responses
 
-- pook 
+#### pook 
 
 https://github.com/h2non/pook
 
@@ -1239,15 +1239,15 @@ https://github.com/h2non/pook
 ### Tools & repos
 @snapend
 
-- VCR-Py 
+#### VCR-Py 
 
 https://github.com/kevin1024/vcrpy
 
-- pytest-vcr 
+#### pytest-vcr 
 
 https://github.com/ktosiek/pytest-vcr
 
-- betamax 
+#### betamax 
 
 https://github.com/betamaxpy/betamax
 

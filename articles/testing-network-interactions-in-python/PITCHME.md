@@ -591,10 +591,10 @@ But usually you can't afford yourself this level of confidence in the code
 @snapend
 
 #### Responses 
-#### https://github.com/getsentry/responses
+https://github.com/getsentry/responses
 
 #### pytest-responses 
-#### https://github.com/getsentry/pytest-responses
+https://github.com/getsentry/pytest-responses
 
 +++
 @snap[north]
@@ -698,7 +698,7 @@ def test_save_transaction_dynamic():
 @snapend
 
 #### Pook
-#### https://github.com/h2non/pook
+https://github.com/h2non/pook
 
 +++
 @snap[north]
@@ -848,10 +848,10 @@ async def test_save_transaction_no_rates(pook):
 @snapend
 
 #### VCR-Py 
-#### https://github.com/kevin1024/vcrpy
+https://github.com/kevin1024/vcrpy
 
 #### pytest-vcr
-#### https://github.com/ktosiek/pytest-vcr
+https://github.com/ktosiek/pytest-vcr
 
 +++
 @snap[north]
@@ -1210,33 +1210,27 @@ class BigScaryClass:
 ### Tools & repos
 @snapend
 
-@ul
 - unittest.mock
 - pytest-mock https://github.com/pytest-dev/pytest-mock
 - pytest-asyncio https://github.com/pytest-dev/pytest-asyncio
-@ulend
 
 +++
 @snap[north]
-### Tools
+### Tools & repos
 @snapend
 
-@ul
 - responses https://github.com/getsentry/responses
 - pytest-responses https://github.com/getsentry/pytest-responses
 - pook https://github.com/h2non/pook
-@ulend
 
 +++
 @snap[north]
-### Tools
+### Tools & repos
 @snapend
 
-@ul
 - VCR-Py https://github.com/kevin1024/vcrpy
 - pytest-vcr https://github.com/ktosiek/pytest-vcr
 - betamax 
-@ulend
 
 +++
 @snap[north]

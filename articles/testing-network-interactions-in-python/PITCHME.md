@@ -542,6 +542,17 @@ But usually you can't afford yourself this level of confidence in the code
 ### Generic libs
 @snapend
 
+#### Responses 
+#### https://github.com/getsentry/responses
+
+#### pytest-responses 
+#### https://github.com/getsentry/pytest-responses
+
++++
+@snap[north]
+### Generic libs
+@snapend
+
 ```python
 def test_save_transaction(responses):
     responses.add(
@@ -634,6 +645,14 @@ def test_save_transaction_dynamic():
 </div>
 
 ---
+@snap[north]
+### Universal solution
+@snapend
+
+#### Pook
+#### https://github.com/h2non/pook
+
++++
 @snap[north]
 ### Universal solution
 @snapend
@@ -764,6 +783,17 @@ async def test_save_transaction_no_rates(pook):
 <img src="articles/testing-network-interactions-in-python/img/vhs.jpg" alt="VHS" height="400px"/>
 
 #### vcr-py
+
++++
+@snap[north]
+### Cassettes
+@snapend
+
+#### VCR-Py 
+#### https://github.com/kevin1024/vcrpy
+
+#### pytest-vcr
+#### https://github.com/ktosiek/pytest-vcr
 
 +++
 @snap[north]
@@ -1103,7 +1133,6 @@ class BigScaryClass:
 - unittest.mock
 - pytest-mock https://github.com/pytest-dev/pytest-mock
 - pytest-asyncio https://github.com/pytest-dev/pytest-asyncio
-- responses https://github.com/getsentry/responses
 @ulend
 
 +++
@@ -1112,10 +1141,20 @@ class BigScaryClass:
 @snapend
 
 @ul
+- responses https://github.com/getsentry/responses
 - pytest-responses https://github.com/getsentry/pytest-responses
 - pook https://github.com/h2non/pook
+@ulend
+
++++
+@snap[north]
+### Tools
+@snapend
+
+@ul
 - VCR-Py https://github.com/kevin1024/vcrpy
 - pytest-vcr https://github.com/ktosiek/pytest-vcr
+- betamax 
 @ulend
 
 ---

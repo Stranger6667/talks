@@ -840,8 +840,6 @@ async def test_save_transaction_no_rates(pook):
 
 <img src="articles/testing-network-interactions-in-python/img/vhs.jpg" alt="VHS" height="400px"/>
 
-#### vcr-py
-
 +++
 @snap[north]
 ### Cassettes
@@ -1211,26 +1209,47 @@ class BigScaryClass:
 @snapend
 
 - unittest.mock
-- pytest-mock https://github.com/pytest-dev/pytest-mock
-- pytest-asyncio https://github.com/pytest-dev/pytest-asyncio
+- pytest-mock 
+
+https://github.com/pytest-dev/pytest-mock
+
+- pytest-asyncio 
+
+https://github.com/pytest-dev/pytest-asyncio
 
 +++
 @snap[north]
 ### Tools & repos
 @snapend
 
-- responses https://github.com/getsentry/responses
-- pytest-responses https://github.com/getsentry/pytest-responses
-- pook https://github.com/h2non/pook
+- responses 
+
+https://github.com/getsentry/responses
+
+- pytest-responses 
+
+https://github.com/getsentry/pytest-responses
+
+- pook 
+
+https://github.com/h2non/pook
 
 +++
 @snap[north]
 ### Tools & repos
 @snapend
 
-- VCR-Py https://github.com/kevin1024/vcrpy
-- pytest-vcr https://github.com/ktosiek/pytest-vcr
+- VCR-Py 
+
+https://github.com/kevin1024/vcrpy
+
+- pytest-vcr 
+
+https://github.com/ktosiek/pytest-vcr
+
 - betamax 
+
+https://github.com/betamaxpy/betamax
 
 +++
 @snap[north]

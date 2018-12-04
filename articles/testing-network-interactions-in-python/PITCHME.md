@@ -1247,10 +1247,6 @@ https://github.com/kevin1024/vcrpy
 
 https://github.com/ktosiek/pytest-vcr
 
-#### betamax 
-
-https://github.com/betamaxpy/betamax
-
 +++
 @snap[north]
 ### Example repo

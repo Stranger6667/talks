@@ -88,8 +88,9 @@ Note:
 ##### Interact over network
 
 ---
+@snap[north]
 ### Code
-#### Models
+@snapend
 
 ```python
 from flask_sqlalchemy import SQLAlchemy
@@ -121,9 +122,12 @@ class ExchangeRate(db.Model):
 @[6-16]
 @[19-23]
 
+#### Models
+
 +++
+@snap[north]
 ### Code
-#### Application
+@snapend
 
 ```python
 from flask import Flask
@@ -144,9 +148,12 @@ def create_app():
 @[4-7]
 @[9-11]
 
+#### Application
+
 +++
+@snap[north]
 ### Code
-#### Payments
+@snapend
 
 ```python
 from . import exchange
@@ -171,9 +178,12 @@ def save_transaction(booking_id, amount, currency):
 @[8-15]
 @[16]
 
+#### Payments
+
 +++
+@snap[north]
 ### Code
-#### Exchange
+@snapend
 
 ```python
 from .exceptions import NoExchangeRateError
@@ -194,10 +204,12 @@ def to_eur(amount, currency):
 @[6-7]
 @[8-13]
 
-+++
-### Code
+#### Exchange
 
-##### factories.py
++++
+@snap[north]
+### Code
+@snapend
 
 ```python
 ...
@@ -212,10 +224,12 @@ class ExchangeRateFactory(SQLAlchemyModelFactory):
     ratio = Faker("pydecimal", positive=True)
 ```
 
-@[3-10]
+##### factories.py
+
 +++
+@snap[north]
 ### Code
-##### conftest.py
+@snapend
 
 ```python
 ...
@@ -242,9 +256,12 @@ def database(app):
 @[7-11] App fixture
 @[13-18] DB fixture
 
+##### conftest.py
+
 +++
+@snap[north]
 ### Code
-##### test_payments.py
+@snapend
 
 ```python
 ...
@@ -267,13 +284,19 @@ def test_save_transaction_no_rates():
 @[5-8]
 @[10-15]
 
+##### test_payments.py
+
 ---
-## Cutting out
+@snap[north]
+### Cutting out
+@snapend
 
 <img src="articles/testing-network-interactions-in-python/img/cake-cut.jpg" alt="Cutting out" height="400px"/>
 
 ---
+@snap[north]
 ### New exchange code (sync)
+@snapend
 
 ```python
 ...
@@ -296,15 +319,20 @@ def to_eur(amount, currency):
 @[4-8] Request to 127.0.0.1
 @[9-14] Some error handling
 @[15]
+
 +++
+@snap[north]
 ### Ad hoc tests
+@snapend
 
 <img src="articles/testing-network-interactions-in-python/img/pretend-doesnt-exist.jpeg" alt="Pretend" height="400px"/>
 
 ##### Let's pretend that the new code doesn't exist
 
 +++
+@snap[north]
 ### Ad hoc tests
+@snapend
 
 ```python
 ...
@@ -330,13 +358,16 @@ def test_save_transaction_no_rates(mocker):
 ##### pytest-mock
 
 +++
+@snap[north]
 ### More configurable approach
+@snapend
 
 ```python
 @pytest.fixture
 def setup_rates(mocker):
 
     def inner(**kwargs):
+        ...  # Awesome code here
         mocker.patch("booking.sync.exchange.to_eur", **kwargs)
 
     return inner
@@ -352,30 +383,40 @@ def test_save_transaction_no_rates(setup_rates):
     ...
 ```
 
-@[1-7]
-@[9-10]
-@[13-16]
+@[1-8]
+@[10-11]
+@[14-17]
 
 +++
+@snap[north]
 ### Alternative
+@snapend
 
 ```python
+def setup_rates(mocker, **kwargs):
+    ...  # Awesome code here
+    mocker.patch("booking.sync.exchange.to_eur", **kwargs)
+
 @pytest.fixture(autouse=True)
-def setup(request, mocker):
+def setup(request):
     mark = request.node.get_closest_marker("setup_rates")
     if mark:
-        mocker.patch("booking.sync.exchange.to_eur", **mark.kwargs)
+        mocker = request.getfixturevalue("mocker")
+        setup_rates(mocker, **mark.kwargs)
 
 @pytest.mark.setup_rates(return_value=Decimal(100))
 def test_save_transaction():
     ...
 ```
 
-@[1-5]
-@[7-8]
+@[1-3]
+@[5-10]
+@[12-13]
 
 ---
+@snap[north]
 ### Async version with aiohttp
+@snapend
 
 ```python
 ...
@@ -398,8 +439,11 @@ async def to_eur(amount, currency):
 
 @[3-8]
 @[9-16]
+
 +++
+@snap[north]
 ### Async payments
+@snapend
 
 ```python
 from . import exchange
@@ -414,7 +458,9 @@ async def save_transaction(booking_id, amount, currency):
 @[3-5]
 
 +++
+@snap[north]
 ### Ad hoc tests
+@snapend
 
 ```python
 ...
@@ -463,7 +509,7 @@ async def test_save_transaction_no_rates(mocker):
 
 #### pytest-asyncio
 
----
++++
 @transition[none]
 
 <div class="north-west span-45" style="padding-top: 150px;">
@@ -472,7 +518,6 @@ async def test_save_transaction_no_rates(mocker):
 <ul>
     <li>Easy to setup</li>
     <li>Flexible</li>
-    <li>Doesn't actually test API wrapper</li>
 </ul>
 </div>
 
@@ -493,9 +538,9 @@ It could work for small and simple parts from time to time or it could work as a
 But usually you can't afford yourself this level of confidence in the code
 
 ---
+@snap[north]
 ### Generic libs
-
-#### Responses + pytest
+@snapend
 
 ```python
 def test_save_transaction(responses):
@@ -507,8 +552,12 @@ def test_save_transaction(responses):
     ...
 ```
 
+#### Responses + pytest
+
 +++
+@snap[north]
 ### Emulate exception
+@snapend
 
 ```python
 def test_save_transaction_exception(responses):
@@ -521,7 +570,9 @@ def test_save_transaction_exception(responses):
 ```
 
 +++
+@snap[north]
 ### Dynamic responses
+@snapend
 
 ```python
 ...
@@ -561,7 +612,7 @@ def test_save_transaction_dynamic():
 @[21-25]
 @[27]
 
----
++++
 @transition[none]
 
 <div class="north-west span-45" style="padding-top: 150px;">
@@ -583,7 +634,9 @@ def test_save_transaction_dynamic():
 </div>
 
 ---
+@snap[north]
 ### Universal solution
+@snapend
 
 ```python
 @pytest.fixture
@@ -599,7 +652,9 @@ def pook():
 #### Pook
 
 +++
+@snap[north]
 ### Sync examples
+@snapend
 
 ```python
 ...
@@ -623,7 +678,9 @@ def test_save_transaction_no_rates(pook):
 @[10-15]
 
 +++
+@snap[north]
 ### Async examples
+@snapend
 
 ```python
 ...
@@ -653,7 +710,7 @@ async def test_save_transaction_no_rates(pook):
 @[8-12]
 @[15-19]
 
----
++++
 @transition[none]
 
 <div class="north-west span-45" style="padding-top: 150px;">
@@ -700,14 +757,18 @@ async def test_save_transaction_no_rates(pook):
 </div>
 
 ---
+@snap[north]
 ### Cassettes
+@snapend
 
 <img src="articles/testing-network-interactions-in-python/img/vhs.jpg" alt="VHS" height="400px"/>
 
 #### vcr-py
 
 +++
+@snap[north]
 ### Example
+@snapend
 
 ```python
 ...
@@ -734,7 +795,9 @@ def test_save_transaction_no_rates():
 @[12-17]
 
 +++
+@snap[north]
 ### Actual microservice
+@snapend
 
 ```python
 from decimal import Decimal
@@ -777,7 +840,9 @@ def handle_no_rate(error):
 @[24-31] Error handling
  
 +++
+@snap[north]
 ### Cassette
+@snapend
 
 ```yaml
 interactions:
@@ -800,7 +865,7 @@ version: 1
 
 #### cassettes/test_save_transaction.yaml
 
----
++++
 @transition[none]
 
 <div class="north-west span-45" style="padding-top: 150px;">
@@ -829,7 +894,9 @@ version: 1
 ## Real-life examples
 
 ---
+@snap[north]
 ### API integration
+@snapend
 
 ```python
 @pytest.fixture
@@ -854,7 +921,9 @@ async def test_create_card(mocker, mastercard):
 #### MasterCard XML API
 
 +++
+@snap[north]
 ### API integration
+@snapend
 
 ```
 from lxml import etree
@@ -906,7 +975,9 @@ class MasterCardAPIClient:
 #### Client class
 
 +++
+@snap[north]
 ### API integration process
+@snapend
 
 1. Write a test with **`all`** VCR record mode
 2. Add code
@@ -916,7 +987,9 @@ class MasterCardAPIClient:
 6. Repeat
  
 ---
+@snap[north]
 ### Refactoring example
+@snapend
 
 - 2k lines of code class
 - Multiple external API calls
@@ -924,7 +997,9 @@ class MasterCardAPIClient:
 - No tests
 
 +++
+@snap[north]
 ### Refactoring example
+@snapend
 
 ```python
 class BigScaryClass(object):
@@ -944,10 +1019,12 @@ class BigScaryClass(object):
 @[3-6]
 @[8-12]
 
-##### Target class
+#### Target class
 
 +++
+@snap[north]
 ### Refactoring example
+@snapend
 
 ```python
 @pytest.mark.vcr()
@@ -965,7 +1042,9 @@ def test_ancillaries_core():
 @[5-8]
 
 +++
-### Process
+@snap[north]
+### Refactoring process
+@snapend
 
 - Choose code that you can run on production
 - Record all network interactions for different cases
@@ -975,7 +1054,9 @@ def test_ancillaries_core():
 - Repeat on the higher abstraction level
 
 +++
+@snap[north]
 ### Refactoring example
+@snapend
 
 ```python
 @attr.s
@@ -995,14 +1076,18 @@ class BigScaryClass:
 @[6-11]
 
 +++
+@snap[north]
 ### Result
+@snapend
 
 - Same high-level interface as before
 - Much better internal structure
 - You actually have tests
 
 ---
-### How you could use these approaches?
+@snap[north]
+#### How you could use these approaches?
+@snapend
 
 - Splitting monolithic apps
 - API integrations in TDD style
@@ -1010,13 +1095,23 @@ class BigScaryClass:
 - Refactoring of tightly-coupled code
 
 ---
+@snap[north]
 ### Tools
+@snapend
 
 @ul
 - unittest.mock
 - pytest-mock https://github.com/pytest-dev/pytest-mock
 - pytest-asyncio https://github.com/pytest-dev/pytest-asyncio
 - responses https://github.com/getsentry/responses
+@ulend
+
++++
+@snap[north]
+### Tools
+@snapend
+
+@ul
 - pytest-responses https://github.com/getsentry/pytest-responses
 - pook https://github.com/h2non/pook
 - VCR-Py https://github.com/kevin1024/vcrpy

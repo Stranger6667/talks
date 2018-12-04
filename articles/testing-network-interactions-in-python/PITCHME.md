@@ -1012,14 +1012,16 @@ class BigScaryClass:
 ---
 ### Tools
 
+@ul
 - unittest.mock
-- pytest-mock
-- pytest-asyncio
-- responses
-- pytest-responses
-- pook
-- VCR-Py
-- pytest-vcr
+- pytest-mock https://github.com/pytest-dev/pytest-mock
+- pytest-asyncio https://github.com/pytest-dev/pytest-asyncio
+- responses https://github.com/getsentry/responses
+- pytest-responses https://github.com/getsentry/pytest-responses
+- pook https://github.com/h2non/pook
+- VCR-Py https://github.com/kevin1024/vcrpy
+- pytest-vcr https://github.com/ktosiek/pytest-vcr
+@ulend
 
 ---
 ## Thank you

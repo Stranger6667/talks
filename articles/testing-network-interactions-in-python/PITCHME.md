@@ -58,7 +58,7 @@ Note:
 ##### Monolithic app for flights booking
 
 Note:
-Lets imagine that we built an application for flights booking a couple of years ago.
+Let's imagine that we built an application for flights booking a couple of years ago.
 And after some time it became big, ugly and unmaintainable.
 
 +++
@@ -70,7 +70,7 @@ And after some time it became big, ugly and unmaintainable.
 
 Note:
 No talk about microservices can go without a container ship image. Right?
-Usual way to go nowdays.
+A usual way to go nowadays.
 
 +++
 ### Case study
@@ -91,9 +91,9 @@ And we found one - exchange rates. They are quite independent
 ##### Interact over network
 
 Note:
-Our new approach could look like this. The booking app will interact with the exchange rates app over network. 
+Our new approach could look like this. The booking app will interact with the exchange rates app over the network. 
 It is amazing, isn't it?
-Lets inspect the code we have so far.
+Let's inspect the code we have so far.
 
 ---
 ### Stack
@@ -206,8 +206,8 @@ def save_transaction(booking_id, amount, currency):
 #### Payments
 
 Note:
-The only place we use exchange rate is the payment module.
-We need to store payment transaction amount in EUR as well as in original currency.
+The only place we use the exchange rate is the payment module.
+We need to store payment transaction amount in EUR as well as in the original currency.
 
 +++
 @snap[north]
@@ -481,7 +481,7 @@ async def to_eur(amount, currency):
 @[9-16]
 
 Note:
-But what if we want to be async? No problem, lets use aiohttp.
+But what if we want to be async? No problem lets use aiohttp.
 
 +++
 @snap[north]
@@ -502,7 +502,7 @@ async def save_transaction(booking_id, amount, currency):
 
 Note:
 We need to adapt other code in some way.
-Again, let's pretend that we work with the DB in async way as well.
+Again, let's pretend that we work with the DB in an async way as well.
 
 +++
 @snap[north]
@@ -579,11 +579,11 @@ async def test_save_transaction_no_rates(mocker):
 </div>
 
 Note:
-These kind of tests are good if you can afford saying - I don't care what this code part does internally, 
+These kind of tests are good if you can afford to say - I don't care what this code part does internally, 
 I just assume that it should return this data in this situation.
 I only check if other code works if this part will provide this interface.
-It could work for small and simple parts from time to time or it could work as a temporary solution.
-But usually you can't afford yourself this level of confidence in the code
+It could work for small and simple parts from time to time, or it could work as a temporary solution.
+But usually, you can't afford yourself this level of confidence in the code
 
 ---
 @snap[north]
@@ -782,7 +782,7 @@ async def test_save_transaction_no_rates(pook):
 ### More features
 @snapend
 
-- Regex matching of headers, querystring, path, body, etc
+- Regex matching of headers, query string, path, body, etc
 - Response delay (aiohttp only)
 - Callbacks
 - Many more!
@@ -1189,8 +1189,8 @@ class BigScaryClass:
 ### Result
 @snapend
 
-- Same high-level interface as before
-- Much better internal structure
+- The same high-level interface as before
+- A much better internal structure
 - You actually have tests
 
 ---

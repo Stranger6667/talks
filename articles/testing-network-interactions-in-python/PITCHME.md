@@ -6,8 +6,10 @@
 ### Who am I
 
 - @color[black](Tech Lead at kiwi.com)
-- @color[black](Prague, Czech Republic)
-- @color[black](Love Python & open-source)
+- @color[black](Live in Prague, Czech Republic)
+- @color[black](Graduated as an information security specialist)
+- @color[black](Python since 2011)
+- @color[black](Maintain django-money (Money fields for Django))
 
 ---
 @transition[none]

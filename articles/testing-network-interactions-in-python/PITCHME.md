@@ -273,17 +273,27 @@ def app():
     with app.app_context():
         yield app
 
-@pytest.fixture
-def database(app):
+@pytest.fixture(scope="session")
+def db_schema(app):
     db.create_all()
     yield
     db.session.commit()
     db.drop_all()
+
+@pytest.fixture()
+def database(db_schema):
+    db_schema.begin_nested()
+
+    yield db_schema
+
+    db_schema.rollback()
+    db_schema.close()
 ```
 
 @[3-5] Factories registration
 @[7-11] App fixture
-@[13-18] DB fixture
+@[13-18] DB schema fixture
+@[20-27] DB fixture
 
 ##### conftest.py
 

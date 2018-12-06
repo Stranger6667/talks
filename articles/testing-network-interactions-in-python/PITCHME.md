@@ -112,40 +112,27 @@ Let's inspect the code we have so far.
 @snapend
 
 ```python
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
-
-
+...
 class Transaction(db.Model):
     """Payment transaction."""
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    booking_id = db.Column(db.Integer, nullable=False)
-
+    ...
     amount = db.Column(db.Numeric, nullable=False)
     currency = db.Column(db.String(3), nullable=False)
-
     amount_eur = db.Column(db.Numeric, nullable=False)
-
 
 class ExchangeRate(db.Model):
     """Current ratios to EUR."""
-
     currency = db.Column(db.String(3), primary_key=True)
     ratio = db.Column(db.Numeric, nullable=False)
 ```
 
-@[1-3]
-@[6-16]
-@[19-23]
+@[2-7]
+@[9-12]
 
 #### Models
 
 Note:
-We have two models, transaction and the exchange rate.
-They are kind of straightforward.
+We have two models, transactions and exchange rates to EUR.
 
 +++
 @snap[north]
@@ -153,38 +140,7 @@ They are kind of straightforward.
 @snapend
 
 ```python
-from flask import Flask
-
-def create_app():
-    app = Flask(__name__)
-    db_uri = "postgresql://127.0.0.1:5432/test"
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    from .models import db
-
-    db.init_app(app)
-
-    return app
-```
-
-@[4-7]
-@[9-11]
-
-#### Application
-
-Note:
-Classic flask application factory.
-I omit some configuration loading code here to have a smaller example.
-
-+++
-@snap[north]
-### Code
-@snapend
-
-```python
-from . import exchange
-from .models import db, Transaction
+...
 
 def save_transaction(booking_id, amount, currency):
     """We need to store EUR amount as well."""
@@ -198,12 +154,10 @@ def save_transaction(booking_id, amount, currency):
     )
     db.session.add(transaction)
     db.session.commit()
-    return transaction
 ```
 
-@[6]
-@[8-15]
-@[16]
+@[3-5]
+@[7-14]
 
 #### Payments
 
@@ -217,13 +171,9 @@ We need to store payment transaction amount in EUR as well as in the original cu
 @snapend
 
 ```python
-from .exceptions import NoExchangeRateError
-from .models import ExchangeRate
-
+...
 def to_eur(amount, currency):
     """Convert to EUR."""
-    if currency == "EUR":
-        return amount
     rate = ExchangeRate.query.filter_by(
         currency=currency
     ).one_or_none()
@@ -232,76 +182,7 @@ def to_eur(amount, currency):
     return amount / rate.ratio
 ```
 
-@[6-7]
-@[8-13]
-
 #### Exchange
-
-+++
-@snap[north]
-### Tests
-@snapend
-
-```python
-...
-
-class ExchangeRateFactory(SQLAlchemyModelFactory):
-    class Meta:
-        model = models.ExchangeRate
-        sqlalchemy_session = session
-        sqlalchemy_session_persistence = "commit"
-
-    currency = Faker("pystr", min_chars=3, max_chars=3)
-    ratio = Faker("pydecimal", positive=True)
-```
-
-##### factories.py
-
-+++
-@snap[north]
-### Tests
-@snapend
-
-```python
-...
-
-from . import factories
-
-register(factories.ExchangeRateFactory)
-
-@pytest.fixture
-def app():
-    app = create_app()
-    with app.app_context():
-        yield app
-
-@pytest.fixture(scope="session")
-def db_schema(app):
-    db.create_all()
-    yield
-    db.session.commit()
-    db.drop_all()
-
-@pytest.fixture()
-def database(db_schema):
-    db_schema.begin_nested()
-
-    yield db_schema
-
-    db_schema.rollback()
-    db_schema.close()
-```
-
-@[3-5] Factories registration
-@[7-11] App fixture
-@[13-18] DB schema fixture
-@[20-27] DB fixture
-
-##### conftest.py
-
-Note:
-We will not care about wrapping tests in transactions,
-let's just drop everything for every test
 
 +++
 @snap[north]
@@ -419,7 +300,7 @@ def test_save_transaction_no_rates(mocker):
 def setup_rates(mocker):
 
     def inner(**kwargs):
-        ...  # Awesome code here
+        ...  # Your awesome dynamic configuration
         mocker.patch("booking.sync.exchange.to_eur", **kwargs)
 
     return inner
@@ -446,7 +327,7 @@ def test_save_transaction_no_rates(setup_rates):
 
 ```python
 def setup_rates(mocker, **kwargs):
-    ...  # Awesome code here
+    ...  # Your awesome dynamic configuration
     mocker.patch("booking.sync.exchange.to_eur", **kwargs)
 
 @pytest.fixture(autouse=True)

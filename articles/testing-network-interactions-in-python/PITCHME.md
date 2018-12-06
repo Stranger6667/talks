@@ -539,7 +539,7 @@ async def test_save_transaction_no_rates(mocker):
         return_value=coro()
     )
     with pytest.raises(
-        NoExchangeRateError, 
+        NoExchangeRateError,
         message="No such rate"
     ):
         await save_transaction(1, Decimal(10), "NOK")
@@ -775,7 +775,7 @@ async def test_save_transaction_no_rates(pook):
 
 @[3-6]
 @[8-12]
-@[15-19]
+@[15-20]
 
 +++
 @snap[north]
@@ -956,23 +956,20 @@ version: 1
 ### Record modes
 @snapend
 
-@ul
-- **`all`**
-- **`once`**
-- **`none`**
-@ulend
+- **`all`** - record all, never replay
+- **`once`** - record if no cassette, only replay otherwise
+- **`new_episodes`** - record if no cassette, replay and record new otherwise 
+- **`none`** - never record, always replay
 
 +++
 @snap[north]
 ### Secrets filters
 @snapend
 
-@ul
 - **Headers**
 - **Querystring**
 - **POST data**
 - **Custom filters**
-@ulend
 
 +++
 @transition[none]

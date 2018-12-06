@@ -1,6 +1,6 @@
 ### @color[black](Testing)
 ### @color[black](network interactions)
-### @color[black](in Python)
+### @color[black](in Python, part 1)
 
 ---
 ### Who am I

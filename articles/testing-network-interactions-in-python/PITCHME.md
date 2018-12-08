@@ -8,7 +8,7 @@
 - @color[black](Tech Lead at kiwi.com)
 - @color[black](Live in Prague, Czech Republic)
 - @color[black](Graduated as an information security specialist)
-- @color[black](Python since 2011)
+- @color[black](Python since 2010)
 - @color[black](Maintain django-money (Money fields for Django))
 
 ---

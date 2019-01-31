@@ -210,6 +210,12 @@ class TestIntegers(unittest.TestCase):
 - test fixture
 - test runner
 
+Note:
+- Individual unit of testing
+- Test suite - a collection of test cases or test suites
+- A test fixture represents the preparation needed to perform one or more tests, and any associate cleanup actions
+- Runs tests, provides reports
+
 ---
 ### Pytest
 
@@ -355,11 +361,25 @@ def test_add(x, y, expected):
 
 - Selenium
 - Report to HTML / XML / Issue tracker
+ 
+---
+### Selenium
 
-#### There are a lot of plugins for pytest 
 ```python
 def test_example(selenium):
     selenium.get('http://www.example.com')
 ```
 
-#### Selenium
+---
+### Graphic interfaces
+
+```python
+def test_hello(qtbot):
+    widget = HelloWidget()
+    qtbot.addWidget(widget)
+
+    # click in the Greet button and make sure it updates the appropriate label
+    qtbot.mouseClick(window.button_greet, QtCore.Qt.LeftButton)
+
+    assert window.greet_label.text() == 'Hello!'
+```

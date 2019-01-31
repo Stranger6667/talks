@@ -1,20 +1,23 @@
-### Automated testing in Python
+# Automated testing in Python
 
 ---
 ### Overview
 
-- Introduction. Purpose & types of automated testing
-- `unittest` framework. Core definitions & patterns
+- Introduction. Purpose and types of automated testing
+- **`unittest`** framework. Core definitions and patterns
 - Pytest
 - Usage examples
 
 ---
 ### Purpose of testing
 
-### Helps to verify your assumptions about a software product
+#### Helps to verify your assumptions about a software product
 
 ---
+@transition[none]
+@snap[north]
 ### Common types of testing
+@snapend
 
 - Unit
 - Integration
@@ -31,26 +34,33 @@ Note:
 ### Unittest framework
 
 ---
+@transition[none]
+@snap[north]
 ### Code example
+@snapend
 
 ```python
-# project.py
 def add(x, y):
     return x + y
 
 def sub(x, y):
     return x - y
 ```
+@[1-2]
+@[4-5]
+
+##### **`project.py`**
 
 +++
+@transition[none]
+@snap[north]
 ### Test cases
+@snapend
 
 ```python
-# test_add.py
 import unittest
 
 from project import add
-
 
 class TestIntegers(unittest.TestCase):
 
@@ -61,10 +71,18 @@ class TestIntegers(unittest.TestCase):
         # Illustrates test failure
         self.assertEqual(add(2, 3), 6)
 
-
 if __name__ == '__main__':
     unittest.main()
 ```
+
+@[1] Import unittest
+@[3] Import you code
+@[5] Create a subclass
+@[7-8] Define your tests 
+@[9-11] Define your tests 
+@[13-14] To run tests
+ 
+##### **`test_add.py`**
 
 Note:
 - test methods names start with `test_`
@@ -72,14 +90,20 @@ Note:
 - `main()` is for CLI
 
 ---
+@transition[none]
+@snap[north]
 ### How to run tests
+@snapend
 
 ```bash
 $ python test_add.py
 ```
 
 +++
+@transition[none]
+@snap[north]
 ### How to run tests
+@snapend
 
 ```bash
 $ python -m unittest test_add test_sub
@@ -88,7 +112,10 @@ $ python -m unittest test_add.TestIntegers.test_success
 ```
 
 +++
+@transition[none]
+@snap[north]
 ### Test discovery
+@snapend
 
 ```bash
 $ python -m unittest
@@ -97,7 +124,10 @@ $ python -m unittest
 #### Will look for tests in the current directory
 
 ---
+@transition[none]
+@snap[north]
 ### Test fixtures
+@snapend
 
 ```python
 import sqlite3
@@ -118,6 +148,12 @@ class TestIntegers(unittest.TestCase):
         self.connection.close()
 ```
 
+@[5-7]
+@[9-12]
+@[14-16]
+
+##### **`test_database.py``**
+
 ---
 ### Usual test's structure
 
@@ -136,25 +172,34 @@ class TestIntegers(unittest.TestCase):
 - tear down
 
 ---
+@transition[none]
+@snap[north]
 ### Common assertions
+@snapend
 
 - assertEqual
 - assertNotEqual
 - assertLess
 - assertGreater
-- ... # a lot of them
+- ...
 
 ##### https://docs.python.org/3/library/unittest.html
 
 ---
+@transition[none]
+@snap[north]
 ### How to organize a test suite
+@snapend
 
 - classes
 - modules
 - packages
 
 ---
+@transition[none]
+@snap[north]
 ### Unittest summary
+@snapend
 
 - test case
 - test suite
@@ -167,8 +212,10 @@ class TestIntegers(unittest.TestCase):
 #### Python testing framework
 
 ---
----
+@transition[none]
+@snap[north]
 ### Unittest
+@snapend
 
 ```python
 ...
@@ -186,7 +233,11 @@ if __name__ == '__main__':
 ```
 
 ---
+@transition[none]
+@snap[north]
 ### Pytest
+@snapend
+
 ```python
 from project import add
 
@@ -223,7 +274,10 @@ pytest_example.py:12: AssertionError
 Pytest can run your unittest tests as well
 
 ---
+@transition[none]
+@snap[north]
 ### Fixtures
+@snapend
 
 ```python
 class TestIntegers(unittest.TestCase):
@@ -243,7 +297,10 @@ class TestIntegers(unittest.TestCase):
 ```
 
 +++
+@transition[none]
+@snap[north]
 ### Fixtures
+@snapend
 
 ```python
 import sqlite3
@@ -257,11 +314,18 @@ def cursor():
     yield cursor
     cursor.close()
     connection.close()
-    
 ```
 
+@[5-6]
+@[7-8]
+@[9]
+@[10-11]
+
 +++
+@transition[none]
+@snap[north]
 ### Fixtures
+@snapend
 
 ```python
 def test_sql(cursor):

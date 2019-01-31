@@ -360,6 +360,8 @@ def test_add(x, y, expected):
 ### Usage examples
 
 - Selenium
+- Graphic interfaces
+- API testing
 - Report to HTML / XML / Issue tracker
  
 ---

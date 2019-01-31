@@ -16,7 +16,7 @@
 ---
 @transition[none]
 @snap[north]
-### Common types of testing
+#### Common types of testing
 @snapend
 
 - Unit
@@ -169,35 +169,35 @@ class TestIntegers(unittest.TestCase):
 - run all tests in the test case
 - tear down
 
-#### For test cases
-
 ---
 @transition[none]
 @snap[north]
-### Common assertions
+#### Common assertions
 @snapend
 
-@ul
 - assertEqual
 - assertNotEqual
 - assertLess
 - assertGreater
 - ...
-@ulend
-
-##### https://docs.python.org/3/library/unittest.html
 
 ---
 @transition[none]
 @snap[north]
-### How to organize a test suite
+### Documentation
 @snapend
 
-@ul
+### https://docs.python.org/3/library/unittest.html
+
+---
+@transition[none]
+@snap[north]
+#### How to organize a test suite
+@snapend
+
 - classes
 - modules
 - packages
-@ulend
 
 ---
 @transition[none]

@@ -79,8 +79,8 @@ if __name__ == '__main__':
 @[3] Import you code
 @[5] Create a subclass
 @[7-8] Define your tests 
-@[9-11] Define your tests 
-@[13-14] To run tests
+@[10-12] Define your tests 
+@[14-15] To run tests
  
 ##### **`test_add.py`**
 
@@ -95,7 +95,7 @@ Note:
 ### How to run tests
 @snapend
 
-```bash
+```
 $ python test_add.py
 ```
 
@@ -105,7 +105,7 @@ $ python test_add.py
 ### How to run tests
 @snapend
 
-```bash
+```
 $ python -m unittest test_add test_sub
 $ python -m unittest test_add.TestIntegers
 $ python -m unittest test_add.TestIntegers.test_success
@@ -117,7 +117,7 @@ $ python -m unittest test_add.TestIntegers.test_success
 ### Test discovery
 @snapend
 
-```bash
+```
 $ python -m unittest
 ```
 
@@ -155,7 +155,7 @@ class TestIntegers(unittest.TestCase):
 ##### **`test_database.py``**
 
 ---
-### Usual test's structure
+### Usual test structure
 
 - set up
 - execute
@@ -163,13 +163,13 @@ class TestIntegers(unittest.TestCase):
 - tear down
 
 +++
-### Usual test's structure
-
-#### Test cases
+### Usual test structure
 
 - set up
 - run all tests in the test case
 - tear down
+
+#### For test cases
 
 ---
 @transition[none]
@@ -177,11 +177,13 @@ class TestIntegers(unittest.TestCase):
 ### Common assertions
 @snapend
 
+@ul
 - assertEqual
 - assertNotEqual
 - assertLess
 - assertGreater
 - ...
+@ulend
 
 ##### https://docs.python.org/3/library/unittest.html
 
@@ -191,9 +193,11 @@ class TestIntegers(unittest.TestCase):
 ### How to organize a test suite
 @snapend
 
+@ul
 - classes
 - modules
 - packages
+@ulend
 
 ---
 @transition[none]

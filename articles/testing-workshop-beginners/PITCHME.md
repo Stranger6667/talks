@@ -385,3 +385,11 @@ def test_hello(qtbot):
 
     assert window.greet_label.text() == 'Hello!'
 ```
+
+---
+
+## Thank you
+
+- https://gitpitch.com/Stranger6667/
+- https://twitter.com/Stranger6667
+- https://bit.ly/2S3IE9z

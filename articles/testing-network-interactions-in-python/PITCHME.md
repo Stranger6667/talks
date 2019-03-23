@@ -6,10 +6,10 @@
 ### Who am I
 
 - @color[black](Tech Lead at kiwi.com)
-- @color[black](Live in Prague, Czech Republic)
+- @color[black](Live in Prague Czech Republic)
 - @color[black](Graduated as an information security specialist)
 - @color[black](Python since 2010)
-- @color[black](Maintain django-money (Money fields for Django))
+- @color[black](Maintain django-money Money fields for Django)
 
 ---
 @transition[none]
@@ -126,8 +126,8 @@ class ExchangeRate(db.Model):
     ratio = db.Column(db.Numeric, nullable=False)
 ```
 
-@[2-7]
-@[9-12]
+@[2-7](a)
+@[9-12](b)
 
 #### Models
 

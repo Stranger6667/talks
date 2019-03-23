@@ -12,6 +12,5 @@ class ExchangeRate(db.Model):
     currency = db.Column(db.String(3), primary_key=True)
     ratio = db.Column(db.Numeric, nullable=False)
 ```
-
 @[2-7]
 @[9-12]

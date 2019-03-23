@@ -1,19 +1,33 @@
 ---
 ### Bla
 
-```python
-...
-class Transaction(db.Model):
-    """Payment transaction."""
-    ...
-    amount = db.Column(db.Numeric, nullable=False)
-    currency = db.Column(db.String(3), nullable=False)
-    amount_eur = db.Column(db.Numeric, nullable=False)
+```go
+package main
 
-class ExchangeRate(db.Model):
-    """Current ratios to EUR."""
-    currency = db.Column(db.String(3), primary_key=True)
-    ratio = db.Column(db.Numeric, nullable=False)
+import (
+	"fmt"
+	"golang.org/x/net/websocket"
+	"log"
+	"net/http"
+)
+
+func echoHandler(ws *websocket.Conn) {
+	msg := make([]byte, 512)
+	n, err := ws.Read(msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Receive: %s\n", msg[:n])
+
+	m, err := ws.Write(msg[:n])
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Send: %s\n", msg[:m])
+}
 ```
-@[2-7]
-@[9-12]
+
+
+@[1]
+@[3-8]
+@[10-24]

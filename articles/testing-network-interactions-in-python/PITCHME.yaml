@@ -1,0 +1,5 @@
+theme: night
+theme-override: css/PITCHME.css
+highlight: atom-one-dark
+footnote: "GitPitch Live Code Presenting Feature Demo"
+published : true

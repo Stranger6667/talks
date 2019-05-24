@@ -552,17 +552,7 @@ RATES = {"CZK": Decimal("25.5")}
 @pytest.fixture
 def setup_rates(responses):
     def request_callback(request):
-        parsed = urlparse(request.url)
-        query_string = dict(parse_qsl(parsed.query))
-        amount = Decimal(query_string["amount"])
-        currency = query_string["currency"]
-        try:
-            rate = RATES[currency]
-            result = {"result": format(amount / rate, ".2f")}
-            status = 200
-        except KeyError:
-            result = {"detail": "No such rate"}
-            status = 400
+        ...  # Awesome dynamic logic
         return status, {}, json.dumps(result)
 
     responses.add_callback(
@@ -577,10 +567,9 @@ def test_save_transaction_dynamic():
 ```
 
 @[5-6]
-@[7-11]
-@[12-19]
-@[21-25]
-@[27]
+@[7-9]
+@[11-15]
+@[17]
 
 +++
 @transition[none]
@@ -776,20 +765,14 @@ pytestmark = [
 ]
 
 def test_save_transaction():
-    transaction = save_transaction(1, Decimal(2550), "CZK")
-    assert transaction.amount_eur == Decimal(100)
+    ...
 
 def test_save_transaction_no_rates():
-    with pytest.raises(
-        NoExchangeRateError, 
-        message="No such rate"
-    ):
-        save_transaction(1, Decimal(10), "NOK")
+    ...
 ```
 
 @[3-6]
-@[8-10]
-@[12-17]
+@[8-12]
 
 +++
 @snap[north]
@@ -942,7 +925,7 @@ async def test_create_card(mocker, mastercard):
 ### API integration
 @snapend
 
-```
+```python
 from lxml import etree
 from lxml.builder import E
 

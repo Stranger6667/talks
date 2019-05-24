@@ -448,6 +448,24 @@ async def test_save_transaction_no_rates(mocker):
 @[29-33]
 
 #### pytest-asyncio
+##### Python < 3.8
+
++++
+@snap[north]
+### Ad hoc tests
+@snapend
+
+```python
+>>> async def async_func(): pass
+...
+>>> mock = MagicMock(async_func)
+>>> mock
+<MagicMock spec='function' id='...'>
+>>> mock()
+<coroutine object AsyncMockMixin._mock_call at ...>
+```
+
+#### Python 3.8 supports async mocks
 
 +++
 @transition[none]

@@ -317,8 +317,7 @@ def test_save_transaction_no_rates(setup_rates):
 ```
 
 @[1-8]
-@[10-11]
-@[14-17]
+@[10-17]
 
 +++
 @snap[north]
@@ -418,9 +417,6 @@ async def test_save_transaction(mocker):
         "booking.aio.exchange.to_eur", 
         return_value=coro()
     )
-    transaction = await save_transaction(
-        1, Decimal(10), "CZK"
-    )
     ...
 
 async def test_save_transaction_no_rates(mocker):
@@ -431,21 +427,12 @@ async def test_save_transaction_no_rates(mocker):
         "booking.aio.exchange.to_eur", 
         return_value=coro()
     )
-    with pytest.raises(
-        NoExchangeRateError,
-        message="No such rate"
-    ):
-        await save_transaction(1, Decimal(10), "NOK")
+    ...
 ```
 
 @[3-6]
-@[8]
-@[9-10]
-@[12-15]
-@[16-19]
-@[22-23]
-@[25-28]
-@[29-33]
+@[8-15]
+@[18-25]
 
 #### pytest-asyncio
 ##### Python < 3.8
@@ -567,8 +554,7 @@ def test_save_transaction_dynamic():
 ```
 
 @[5-6]
-@[7-9]
-@[11-15]
+@[7-15]
 @[17]
 
 +++
@@ -673,9 +659,8 @@ async def test_save_transaction_no_rates(pook):
     ...
 ```
 
-@[3-6]
-@[8-12]
-@[15-20]
+@[5]
+@[8-20]
 
 +++
 @snap[north]
@@ -813,10 +798,8 @@ def handle_no_rate(error):
     return response
 ```
 
-@[1-5] Flask app
-@[7-9] Sample rates
-@[11-16] Rate conversion
-@[18-22] App route
+@[5-9] Flask app
+@[11-22] Rate conversion
 @[24-31] Error handling
  
 +++

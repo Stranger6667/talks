@@ -6,7 +6,7 @@
 @snapend
 
 ---
-### Who am I
+### Who am I?
 
 - @color[black](Tech Lead at kiwi.com)
 - @color[black](Live in Prague, Czech Republic)

@@ -801,7 +801,15 @@ def handle_no_rate(error):
 @[5-9] Flask app
 @[11-22] Rate conversion
 @[24-31] Error handling
- 
+
++++
+@snap[north]
+### New process
+@snapend
+
+1. The first test run will hit the real service over HTTP
+2. All next runs will take network responses from cassettes
+
 +++
 @snap[north]
 ### Cassette

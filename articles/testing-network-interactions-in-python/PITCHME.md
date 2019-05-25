@@ -970,12 +970,13 @@ class MasterCardAPIClient:
 ### API integration process
 @snapend
 
-1. Write a test with **`all`** VCR record mode
+1. Write a test with **`once`** / **`all`** VCR record mode
 2. Add code
 3. Run the test with sandbox credentials
-4. Adapt the code and the test until it works
-5. Make your assertions stronger
-6. Repeat
+4. Remove / adjust the cassette if needed
+5. Adapt the code and the test until it works
+6. Make your assertions stronger
+7. Repeat
  
 ---
 @snap[north]

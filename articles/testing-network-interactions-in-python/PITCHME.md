@@ -935,7 +935,7 @@ class MasterCardAPIClient:
             ...
         )
         return {
-            "amount": ...,
+            "amount": response.amount,
             ...
         }
 

@@ -393,8 +393,6 @@ async def save_transaction(booking_id, amount, currency):
     ...
 ```
 
-@[3-5]
-
 Note:
 We need to adapt other code in some way.
 Again, let's pretend that we work with the DB in an async way as well.

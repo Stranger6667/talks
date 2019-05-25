@@ -104,7 +104,7 @@ Let's inspect the code we have so far.
 ### Stack
 
 - Python 3.7
-- Flask + connexion
+- Flask/AioHTTP + Connexion
 - SQLAlchemy
 - PostgreSQL
 - Pytest

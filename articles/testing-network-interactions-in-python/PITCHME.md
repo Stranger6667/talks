@@ -1086,7 +1086,7 @@ class BigScaryClass:
 - The same high-level interface as before
 - A much better internal structure
 - You actually have tests
-- Fixed multiple small bugs
+- Fixed multiple bugs on the way
 
 ---
 @snap[north]

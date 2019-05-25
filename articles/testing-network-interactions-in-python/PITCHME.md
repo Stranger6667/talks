@@ -972,8 +972,8 @@ class MasterCardAPIClient:
 
 1. Write a test with **`all`** VCR record mode
 2. Add code
-3. Run test with sandbox credentials
-4. Adapt code and test until it works
+3. Run the test with sandbox credentials
+4. Adapt the code and the test until it works
 5. Make your assertions stronger
 6. Repeat
  

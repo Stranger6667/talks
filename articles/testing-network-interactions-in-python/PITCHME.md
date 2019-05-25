@@ -1048,6 +1048,16 @@ def test_ancillaries_core():
 
 +++
 @snap[north]
+### When to stop?
+@snapend
+
+- Set goals of what you are going to cover
+- Balance your efforts vs effect
+- It is not possible to get 100% path coverage
+- Consider possible risks 
+
++++
+@snap[north]
 ### Refactoring example
 @snapend
 
@@ -1076,6 +1086,7 @@ class BigScaryClass:
 - The same high-level interface as before
 - A much better internal structure
 - You actually have tests
+- Fixed multiple small bugs
 
 ---
 @snap[north]

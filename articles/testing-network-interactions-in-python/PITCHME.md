@@ -1,6 +1,5 @@
 ### @color[black](Testing network interactions)
 ### @color[black](in Python)
-#### @color[black](part 1)
 
 ---
 ### Who am I
@@ -9,7 +8,7 @@
 - @color[black](Live in Prague, Czech Republic)
 - @color[black](Graduated as an information security specialist)
 - @color[black](Python since 2010)
-- @color[black](Maintain django-money (Money fields for Django))
+- @color[black](Co-maintain django-money (Money fields for Django))
 
 ---
 @transition[none]
@@ -113,17 +112,17 @@ Let's inspect the code we have so far.
 
 ```python
 ...
-class Transaction(db.Model):
+class Transaction(Model):
     """Payment transaction."""
     ...
-    amount = db.Column(db.Numeric, nullable=False)
-    currency = db.Column(db.String(3), nullable=False)
-    amount_eur = db.Column(db.Numeric, nullable=False)
+    amount = Column(Numeric, nullable=False)
+    currency = Column(String(3), nullable=False)
+    amount_eur = Column(Numeric, nullable=False)
 
-class ExchangeRate(db.Model):
+class ExchangeRate(Model):
     """Current ratios to EUR."""
-    currency = db.Column(db.String(3), primary_key=True)
-    ratio = db.Column(db.Numeric, nullable=False)
+    currency = Column(String(3), primary_key=True)
+    ratio = Column(Numeric, nullable=False)
 ```
 
 @[2-7]

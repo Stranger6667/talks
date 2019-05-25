@@ -554,7 +554,6 @@ def test_save_transaction_dynamic():
     ...
 ```
 
-@[5-6]
 @[7-15]
 @[17]
 
